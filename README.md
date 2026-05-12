@@ -3,7 +3,6 @@
 > Marketplace mobile-first para compra, venda e revenda de livros, desenvolvido em monorepo com **React Native (Expo)**, **Kotlin + Spring Boot** e **PostgreSQL**.
 
 [![Status](https://img.shields.io/badge/status-em%20desenvolvimento-orange)]()
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Mobile](https://img.shields.io/badge/mobile-React%20Native%20%2B%20Expo-blue)]()
 [![Backend](https://img.shields.io/badge/backend-Kotlin%20%2B%20Spring%20Boot%203-purple)]()
 [![Database](https://img.shields.io/badge/database-PostgreSQL%2016-336791)]()
