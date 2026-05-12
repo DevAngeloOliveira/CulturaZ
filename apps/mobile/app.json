@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "CulturaZ",
+    "slug": "culturaz",
+    "version": "0.1.0",
+    "scheme": "culturaz",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#173F35"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.culturaz.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#173F35"
+      },
+      "package": "com.culturaz.app"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": ["expo-font"],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}

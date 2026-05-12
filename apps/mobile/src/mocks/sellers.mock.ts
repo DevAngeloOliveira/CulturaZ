@@ -1,0 +1,43 @@
+import type { SellerProfile } from '@/types/seller';
+
+export const sellersMock: SellerProfile[] = [
+  {
+    id: 'sel-pagina-viva',
+    userId: 'usr-paginaviva',
+    storeName: 'Sebo Página Viva',
+    description: 'Acervo curado com mais de 8.000 títulos, especializado em literatura brasileira e técnicos.',
+    type: 'SEBO',
+    rating: 4.8,
+    activeListingsCount: 423,
+    status: 'ACTIVE',
+    isVerified: true,
+    city: 'São Paulo',
+    state: 'SP',
+  },
+  {
+    id: 'sel-academica',
+    userId: 'usr-acad',
+    storeName: 'Acadêmica do Largo',
+    description: 'Manuais universitários e técnicos novos e usados.',
+    type: 'BOOKSTORE',
+    rating: 4.6,
+    activeListingsCount: 287,
+    status: 'ACTIVE',
+    isVerified: true,
+    city: 'Rio de Janeiro',
+    state: 'RJ',
+  },
+  {
+    id: 'sel-rodrigo',
+    userId: 'usr-rodrigo',
+    storeName: 'Estante do Rodrigo',
+    description: 'Vendedor individual revendendo livros pessoais.',
+    type: 'INDIVIDUAL',
+    rating: 4.4,
+    activeListingsCount: 27,
+    status: 'ACTIVE',
+    isVerified: false,
+    city: 'Belo Horizonte',
+    state: 'MG',
+  },
+];

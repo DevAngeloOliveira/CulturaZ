@@ -1,0 +1,31 @@
+# Normaliza line endings para evitar quebrar scripts em Linux/macOS.
+* text=auto eol=lf
+
+# Scripts shell devem manter LF mesmo em Windows
+*.sh text eol=lf
+gradlew text eol=lf
+
+# Scripts batch e arquivos PowerShell mantêm CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binários — não modificar
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+
+# Locks
+pnpm-lock.yaml -diff
+yarn.lock -diff
+package-lock.json -diff

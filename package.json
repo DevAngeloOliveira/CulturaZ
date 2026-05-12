@@ -1,0 +1,29 @@
+{
+  "name": "culturaz",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CulturaZ — marketplace mobile-first para compra, venda e revenda de livros.",
+  "author": "Ângelo Oliveira <dev.angelooliveira@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DevAngeloOliveira/CulturaZ.git"
+  },
+  "scripts": {
+    "mobile": "pnpm --filter mobile start",
+    "mobile:android": "pnpm --filter mobile android",
+    "mobile:ios": "pnpm --filter mobile ios",
+    "mobile:typecheck": "pnpm --filter mobile typecheck",
+    "mobile:lint": "pnpm --filter mobile lint",
+    "api:run": "cd apps/api && ./gradlew bootRun",
+    "api:build": "cd apps/api && ./gradlew build",
+    "api:test": "cd apps/api && ./gradlew test",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.yml down"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.12.0"
+}

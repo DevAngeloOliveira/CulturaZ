@@ -1,0 +1,12 @@
+{
+  "name": "@culturaz/contracts",
+  "version": "0.1.0",
+  "description": "Fonte de verdade dos contratos OpenAPI do CulturaZ.",
+  "private": true,
+  "main": "openapi.yaml",
+  "files": [
+    "openapi.yaml",
+    "domain.md",
+    "README.md"
+  ]
+}

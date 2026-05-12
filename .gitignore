@@ -1,0 +1,90 @@
+# ============================================================
+# CulturaZ — .gitignore raiz do monorepo
+# ============================================================
+
+# -------- Node / pnpm --------
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml.bak
+
+# -------- Build outputs --------
+dist/
+build/
+out/
+.next/
+.expo/
+.expo-shared/
+*.tsbuildinfo
+
+# -------- Expo / React Native --------
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+ios/
+android/
+.expo/
+expo-env.d.ts
+
+# -------- Gradle / Kotlin / JVM --------
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+out/
+bin/
+*.class
+hs_err_pid*
+
+# -------- IDE / Editors --------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.shared.json
+.fleet/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# -------- OS --------
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# -------- Env / secrets --------
+.env
+.env.local
+.env.*.local
+*.pem
+*.crt
+secrets/
+
+# -------- Logs / coverage --------
+*.log
+logs/
+coverage/
+.nyc_output/
+
+# -------- Docker / runtime --------
+docker-data/
+postgres-data/
+
+# -------- Misc --------
+*.bak
+*.swp
+*.swo
+.cache/
+.turbo/

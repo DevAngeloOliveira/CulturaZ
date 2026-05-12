@@ -1,0 +1,40 @@
+name: culturaz
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: culturaz-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: culturaz
+      POSTGRES_USER: culturaz
+      POSTGRES_PASSWORD: culturaz
+      TZ: America/Sao_Paulo
+      PGTZ: America/Sao_Paulo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U culturaz -d culturaz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer:4
+    container_name: culturaz-adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: pepa-linha
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    name: culturaz_postgres_data

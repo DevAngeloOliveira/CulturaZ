@@ -1,0 +1,41 @@
+name: CI · API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/contracts/**'
+      - '.github/workflows/ci-api.yml'
+  pull_request:
+    paths:
+      - 'apps/api/**'
+      - 'packages/contracts/**'
+      - '.github/workflows/ci-api.yml'
+
+jobs:
+  build:
+    name: Build & test API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle (com cache)
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build
+        run: ./gradlew build --no-daemon
+
+      - name: Tests
+        run: ./gradlew test --no-daemon

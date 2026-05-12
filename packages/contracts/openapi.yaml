@@ -1,0 +1,817 @@
+openapi: 3.1.0
+info:
+  title: CulturaZ API
+  version: 0.1.0
+  description: |
+    Contratos REST do CulturaZ — marketplace de livros.
+
+    **Status:** Entrega 1 (fundação). A maioria dos endpoints está documentada
+    mas ainda não implementada. Cada módulo expõe um endpoint `GET /api/{module}/health`
+    que confirma que o pacote subiu.
+
+    Convenções:
+    - Datas em ISO 8601 UTC (`2025-05-12T14:30:00Z`).
+    - Dinheiro como string para preservar precisão (`"34.90"`).
+    - Paginação por `page` (0-based) e `size` (default 20, max 100).
+    - Erros via envelope padrão `Error`.
+  contact:
+    name: Ângelo Oliveira
+    email: dev.angelooliveira@gmail.com
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local dev
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Sellers
+  - name: Categories
+  - name: Books
+  - name: Listings
+  - name: Favorites
+  - name: Cart
+  - name: Orders
+  - name: Reviews
+  - name: Admin
+  - name: Health
+
+paths:
+  /actuator/health:
+    get:
+      tags: [Health]
+      summary: Health check geral (Spring Boot Actuator)
+      responses:
+        '200':
+          description: API saudável
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: UP }
+
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Cadastra novo usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        '201':
+          description: Usuário criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Autentica e devolve JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Invalida refresh token
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Logout ok }
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Usuário autenticado atual
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Perfil
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/users/me:
+    get:
+      tags: [Users]
+      summary: Perfil do usuário autenticado
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+    put:
+      tags: [Users]
+      summary: Atualiza nome/telefone
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserRequest' }
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+
+  /api/users/me/addresses:
+    get:
+      tags: [Users]
+      summary: Lista endereços
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Address' }
+    post:
+      tags: [Users]
+      summary: Cria endereço
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddressRequest' }
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Address' }
+
+  /api/sellers:
+    post:
+      tags: [Sellers]
+      summary: Ativa perfil de vendedor para o usuário autenticado
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSellerRequest' }
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SellerProfile' }
+
+  /api/sellers/me:
+    get:
+      tags: [Sellers]
+      summary: Meu perfil de vendedor
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SellerProfile' }
+
+  /api/sellers/{id}:
+    get:
+      tags: [Sellers]
+      summary: Perfil público de vendedor
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SellerProfile' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/categories:
+    get:
+      tags: [Categories]
+      summary: Lista categorias ativas
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Category' }
+
+  /api/books:
+    get:
+      tags: [Books]
+      summary: Busca catálogo bibliográfico
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/SizeQuery'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedBook'
+
+  /api/books/{id}:
+    get:
+      tags: [Books]
+      summary: Detalhes de um livro
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Book' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/listings:
+    get:
+      tags: [Listings]
+      summary: Catálogo público de anúncios
+      parameters:
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string, format: uuid }
+        - in: query
+          name: condition
+          schema: { $ref: '#/components/schemas/BookCondition' }
+        - in: query
+          name: priceMin
+          schema: { type: string }
+        - in: query
+          name: priceMax
+          schema: { type: string }
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/SizeQuery'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PagedListing' }
+
+  /api/listings/{id}:
+    get:
+      tags: [Listings]
+      summary: Detalhes de anúncio
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BookListing' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/seller/listings:
+    post:
+      tags: [Listings]
+      summary: Cria anúncio (vendedor)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateListingRequest' }
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BookListing' }
+
+  /api/favorites:
+    get:
+      tags: [Favorites]
+      summary: Meus favoritos
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/BookListing' }
+
+  /api/favorites/{listingId}:
+    post:
+      tags: [Favorites]
+      summary: Favoritar
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: listingId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '201': { description: Favoritado }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      tags: [Favorites]
+      summary: Desfavoritar
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: listingId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: Removido }
+
+  /api/cart:
+    get:
+      tags: [Cart]
+      summary: Meu carrinho
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+    delete:
+      tags: [Cart]
+      summary: Esvaziar carrinho
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: ok }
+
+  /api/cart/items:
+    post:
+      tags: [Cart]
+      summary: Adicionar item
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddCartItemRequest' }
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Cart' }
+
+  /api/orders:
+    post:
+      tags: [Orders]
+      summary: Criar pedido a partir do carrinho
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateOrderRequest' }
+      responses:
+        '201':
+          description: Pedido criado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+
+  /api/orders/me:
+    get:
+      tags: [Orders]
+      summary: Meus pedidos
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/SizeQuery'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PagedOrder' }
+
+  /api/orders/{id}:
+    get:
+      tags: [Orders]
+      summary: Detalhes de pedido
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+
+  /api/reviews:
+    post:
+      tags: [Reviews]
+      summary: Avalia vendedor após pedido entregue
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateReviewRequest' }
+      responses:
+        '201':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Review' }
+
+  /api/admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: Dashboard administrativo
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminDashboard' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPath:
+      in: path
+      name: id
+      required: true
+      schema: { type: string, format: uuid }
+    PageQuery:
+      in: query
+      name: page
+      schema: { type: integer, default: 0, minimum: 0 }
+    SizeQuery:
+      in: query
+      name: size
+      schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
+
+  responses:
+    Unauthorized:
+      description: Não autenticado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: Conflito (ex: e-mail duplicado)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Erro de validação de campos
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    UserStatus:
+      type: string
+      enum: [ACTIVE, BLOCKED, PENDING_VERIFICATION, DELETED]
+    Role:
+      type: string
+      enum: [CUSTOMER, SELLER, ADMIN, SUPPORT]
+    SellerType:
+      type: string
+      enum: [INDIVIDUAL, BOOKSTORE, SEBO]
+    SellerStatus:
+      type: string
+      enum: [ACTIVE, SUSPENDED, PENDING_REVIEW]
+    BookCondition:
+      type: string
+      enum: [NEW, LIKE_NEW, GOOD, FAIR, DAMAGED]
+    ListingStatus:
+      type: string
+      enum: [PENDING_REVIEW, ACTIVE, PAUSED, BLOCKED, SOLD_OUT, REMOVED]
+    OrderStatus:
+      type: string
+      enum:
+        [CREATED, WAITING_PAYMENT, CONFIRMED, IN_PREPARATION, SHIPPED, DELIVERED, CANCELLED, REFUNDED]
+    PaymentStatus:
+      type: string
+      enum: [SIMULATED, PENDING, APPROVED, REJECTED, REFUNDED, CANCELLED]
+
+    Money:
+      type: string
+      pattern: '^\d+\.\d{2}$'
+      example: "34.90"
+
+    Error:
+      type: object
+      required: [code, message, timestamp]
+      properties:
+        code: { type: string, example: VALIDATION_ERROR }
+        message: { type: string, example: "Campo email é obrigatório" }
+        timestamp: { type: string, format: date-time }
+        path: { type: string, example: /api/auth/register }
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              issue: { type: string }
+
+    Pagination:
+      type: object
+      required: [page, size, total]
+      properties:
+        page: { type: integer }
+        size: { type: integer }
+        total: { type: integer }
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        phone: { type: string, nullable: true }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    AuthResponse:
+      type: object
+      properties:
+        token: { type: string }
+        refreshToken: { type: string }
+        expiresInSeconds: { type: integer }
+        user: { $ref: '#/components/schemas/User' }
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name: { type: string }
+        phone: { type: string, nullable: true }
+
+    User:
+      type: object
+      required: [id, name, email, status, roles, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string, nullable: true }
+        status: { $ref: '#/components/schemas/UserStatus' }
+        roles:
+          type: array
+          items: { $ref: '#/components/schemas/Role' }
+        createdAt: { type: string, format: date-time }
+
+    AddressRequest:
+      type: object
+      required: [label, recipient, street, number, neighborhood, city, state, postalCode]
+      properties:
+        label: { type: string }
+        recipient: { type: string }
+        street: { type: string }
+        number: { type: string }
+        complement: { type: string, nullable: true }
+        neighborhood: { type: string }
+        city: { type: string }
+        state: { type: string, minLength: 2, maxLength: 2 }
+        postalCode: { type: string }
+        isDefault: { type: boolean, default: false }
+
+    Address:
+      allOf:
+        - $ref: '#/components/schemas/AddressRequest'
+        - type: object
+          properties:
+            id: { type: string, format: uuid }
+            createdAt: { type: string, format: date-time }
+
+    CreateSellerRequest:
+      type: object
+      required: [storeName, type]
+      properties:
+        storeName: { type: string }
+        description: { type: string, nullable: true }
+        type: { $ref: '#/components/schemas/SellerType' }
+
+    SellerProfile:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        userId: { type: string, format: uuid }
+        storeName: { type: string }
+        description: { type: string, nullable: true }
+        type: { $ref: '#/components/schemas/SellerType' }
+        rating: { type: number, format: float, example: 4.7 }
+        activeListingsCount: { type: integer, example: 23 }
+        status: { $ref: '#/components/schemas/SellerStatus' }
+
+    Category:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        icon: { type: string, example: "book" }
+        booksCount: { type: integer, example: 142 }
+        active: { type: boolean }
+
+    Book:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        author: { type: string }
+        publisher: { type: string, nullable: true }
+        isbn: { type: string, nullable: true }
+        publicationYear: { type: integer, nullable: true }
+        description: { type: string, nullable: true }
+        categoryId: { type: string, format: uuid }
+
+    PagedBook:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Book' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+
+    CreateListingRequest:
+      type: object
+      required: [bookId, price, stockQuantity, condition, description]
+      properties:
+        bookId: { type: string, format: uuid }
+        price: { $ref: '#/components/schemas/Money' }
+        originalPrice: { $ref: '#/components/schemas/Money' }
+        stockQuantity: { type: integer, minimum: 0 }
+        condition: { $ref: '#/components/schemas/BookCondition' }
+        description: { type: string }
+        coverImageUrl: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        state: { type: string, nullable: true }
+
+    BookListing:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        book: { $ref: '#/components/schemas/Book' }
+        seller: { $ref: '#/components/schemas/SellerProfile' }
+        price: { $ref: '#/components/schemas/Money' }
+        originalPrice: { $ref: '#/components/schemas/Money' }
+        stockQuantity: { type: integer }
+        condition: { $ref: '#/components/schemas/BookCondition' }
+        status: { $ref: '#/components/schemas/ListingStatus' }
+        coverImageUrl: { type: string, nullable: true }
+        description: { type: string }
+        city: { type: string, nullable: true }
+        state: { type: string, nullable: true }
+        tags:
+          type: array
+          items: { type: string }
+        discountPercentage: { type: integer, nullable: true, example: 35 }
+        isFavorite: { type: boolean }
+
+    PagedListing:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/BookListing' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+
+    AddCartItemRequest:
+      type: object
+      required: [listingId, quantity]
+      properties:
+        listingId: { type: string, format: uuid }
+        quantity: { type: integer, minimum: 1 }
+
+    CartItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        listing: { $ref: '#/components/schemas/BookListing' }
+        quantity: { type: integer }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+
+    Cart:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/CartItem' }
+        subtotalAmount: { $ref: '#/components/schemas/Money' }
+
+    CreateOrderRequest:
+      type: object
+      required: [shippingAddressId]
+      properties:
+        shippingAddressId: { type: string, format: uuid }
+
+    OrderItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        listingId: { type: string, format: uuid }
+        sellerId: { type: string, format: uuid }
+        bookTitle: { type: string }
+        quantity: { type: integer }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        subtotal: { $ref: '#/components/schemas/Money' }
+
+    Order:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string, example: "CZ-2025-000123" }
+        buyerId: { type: string, format: uuid }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/OrderItem' }
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        paymentStatus: { $ref: '#/components/schemas/PaymentStatus' }
+        subtotalAmount: { $ref: '#/components/schemas/Money' }
+        shippingAmount: { $ref: '#/components/schemas/Money' }
+        totalAmount: { $ref: '#/components/schemas/Money' }
+        createdAt: { type: string, format: date-time }
+
+    PagedOrder:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Order' }
+        pagination: { $ref: '#/components/schemas/Pagination' }
+
+    CreateReviewRequest:
+      type: object
+      required: [orderId, sellerId, rating]
+      properties:
+        orderId: { type: string, format: uuid }
+        sellerId: { type: string, format: uuid }
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: string, nullable: true }
+        tags: { type: string, nullable: true }
+
+    Review:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        sellerId: { type: string, format: uuid }
+        reviewerName: { type: string }
+        rating: { type: integer }
+        comment: { type: string, nullable: true }
+        tags: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    AdminDashboard:
+      type: object
+      properties:
+        usersCount: { type: integer }
+        sellersCount: { type: integer }
+        listingsPendingCount: { type: integer }
+        ordersTodayCount: { type: integer }
+        revenueLast30Days: { $ref: '#/components/schemas/Money' }
