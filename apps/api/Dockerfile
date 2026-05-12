@@ -1,9 +1,7 @@
-# =============== Build stage ===============
 FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /workspace
 
-# Copia wrapper e scripts de build primeiro para aproveitar cache de camadas
 COPY gradlew gradlew.bat ./
 COPY gradle gradle
 COPY settings.gradle.kts build.gradle.kts gradle.properties ./
@@ -14,7 +12,6 @@ COPY src src
 
 RUN ./gradlew bootJar --no-daemon
 
-# =============== Runtime stage ===============
 FROM eclipse-temurin:21-jre-alpine
 
 RUN addgroup -S culturaz && adduser -S culturaz -G culturaz

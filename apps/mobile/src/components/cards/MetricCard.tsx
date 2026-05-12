@@ -9,9 +9,6 @@ interface MetricCardProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/**
- * Placeholder: será usado no dashboard do vendedor (entrega 5) e do admin (entrega 6).
- */
 export const MetricCard = ({ label, value, hint, style }: MetricCardProps) => (
   <View style={[styles.card, shadows.sm, style]}>
     <Text style={styles.label}>{label}</Text>

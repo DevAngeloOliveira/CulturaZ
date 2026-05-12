@@ -1,15 +1,5 @@
--- =====================================================================
--- CulturaZ — schema inicial
--- =====================================================================
--- Convenções:
---   - Identificadores em UUID (gen_random_uuid() vem da pgcrypto)
---   - Enums como VARCHAR + CHECK
---   - Timestamps TIMESTAMPTZ com default now()
--- =====================================================================
-
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ---------- users ----------
 CREATE TABLE users (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name            VARCHAR(120) NOT NULL,
@@ -26,7 +16,6 @@ CREATE TABLE users (
 
 CREATE INDEX idx_users_status ON users (status);
 
--- ---------- user_roles ----------
 CREATE TABLE user_roles (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -36,7 +25,6 @@ CREATE TABLE user_roles (
     CONSTRAINT uq_user_roles_user_role UNIQUE (user_id, role)
 );
 
--- ---------- addresses ----------
 CREATE TABLE addresses (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -56,7 +44,6 @@ CREATE TABLE addresses (
 
 CREATE INDEX idx_addresses_user_id ON addresses (user_id);
 
--- ---------- seller_profiles ----------
 CREATE TABLE seller_profiles (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
@@ -71,7 +58,6 @@ CREATE TABLE seller_profiles (
     CONSTRAINT chk_seller_status CHECK (status IN ('ACTIVE','SUSPENDED','PENDING_REVIEW'))
 );
 
--- ---------- categories ----------
 CREATE TABLE categories (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name            VARCHAR(120) NOT NULL UNIQUE,
@@ -82,7 +68,6 @@ CREATE TABLE categories (
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ---------- books ----------
 CREATE TABLE books (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title               VARCHAR(255) NOT NULL,
@@ -99,7 +84,6 @@ CREATE TABLE books (
 CREATE INDEX idx_books_isbn ON books (isbn);
 CREATE INDEX idx_books_category_id ON books (category_id);
 
--- ---------- book_listings ----------
 CREATE TABLE book_listings (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     book_id         UUID NOT NULL REFERENCES books(id),
@@ -130,7 +114,6 @@ CREATE INDEX idx_listings_book_id ON book_listings (book_id);
 CREATE INDEX idx_listings_status ON book_listings (status);
 CREATE INDEX idx_listings_status_city ON book_listings (status, city);
 
--- ---------- favorites ----------
 CREATE TABLE favorites (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -139,7 +122,6 @@ CREATE TABLE favorites (
     CONSTRAINT uq_favorites_user_listing UNIQUE (user_id, listing_id)
 );
 
--- ---------- carts ----------
 CREATE TABLE carts (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id     UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
@@ -147,7 +129,6 @@ CREATE TABLE carts (
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ---------- cart_items ----------
 CREATE TABLE cart_items (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     cart_id     UUID NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
@@ -160,7 +141,6 @@ CREATE TABLE cart_items (
     CONSTRAINT uq_cart_item_listing UNIQUE (cart_id, listing_id)
 );
 
--- ---------- orders ----------
 CREATE TABLE orders (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code                    VARCHAR(20) NOT NULL UNIQUE,
@@ -184,7 +164,6 @@ CREATE TABLE orders (
 CREATE INDEX idx_orders_buyer_id ON orders (buyer_id);
 CREATE INDEX idx_orders_status ON orders (status);
 
--- ---------- order_items ----------
 CREATE TABLE order_items (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id    UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -200,7 +179,6 @@ CREATE TABLE order_items (
 CREATE INDEX idx_order_items_order_id ON order_items (order_id);
 CREATE INDEX idx_order_items_seller_id ON order_items (seller_id);
 
--- ---------- reviews ----------
 CREATE TABLE reviews (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id        UUID NOT NULL REFERENCES orders(id),
@@ -216,7 +194,6 @@ CREATE TABLE reviews (
 
 CREATE INDEX idx_reviews_seller_id ON reviews (seller_id);
 
--- ---------- audit_logs ----------
 CREATE TABLE audit_logs (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     actor_user_id   UUID REFERENCES users(id),

@@ -8,9 +8,6 @@ interface ReviewCardProps {
   review: Review;
 }
 
-/**
- * Placeholder: usado no perfil público do vendedor (entrega 7).
- */
 export const ReviewCard = ({ review }: ReviewCardProps) => (
   <View style={[styles.card, shadows.sm]}>
     <View style={styles.headerRow}>

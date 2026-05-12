@@ -10,10 +10,6 @@ interface PlaceholderScreenProps {
   icon?: keyof typeof Ionicons.glyphMap;
 }
 
-/**
- * Placeholder reutilizável para telas ainda não implementadas (entregas futuras).
- * Mantém navegação coerente sem dar a impressão de bug.
- */
 export const PlaceholderScreen = ({
   title,
   message = 'Esta tela faz parte de uma próxima entrega. Veja docs/roadmap.md.',

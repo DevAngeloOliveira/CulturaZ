@@ -1,7 +1,3 @@
-/**
- * Estilo compartilhado da bottom tab. O React Navigation renderiza a TabBar real;
- * este arquivo exporta as opções visuais reutilizadas em todos os Tab.Navigator.
- */
 import { Ionicons } from '@expo/vector-icons';
 import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import { Platform } from 'react-native';

@@ -33,7 +33,6 @@ export const RegisterScreen = ({ onBack }: RegisterScreenProps) => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // TODO entrega 2: chamar POST /api/auth/register e tratar 409 (e-mail duplicado).
       await login(email, password);
     } finally {
       setLoading(false);

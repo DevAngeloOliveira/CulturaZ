@@ -10,6 +10,5 @@ class CulturaZApplicationTests {
 
     @Test
     fun contextLoads() {
-        // Smoke test: garante que o contexto Spring carrega sem erro no perfil 'test'.
     }
 }

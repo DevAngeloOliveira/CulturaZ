@@ -9,12 +9,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 
-/**
- * Configuração base de segurança. Entrega 1: tudo liberado.
- *
- * TODO (entrega 2): introduzir filtro JWT, endpoints públicos via path matcher,
- *  desabilitar form login, configurar AuthenticationManager com UserDetailsService.
- */
 @Configuration
 @EnableWebSecurity
 class SecurityConfig {
@@ -23,7 +17,7 @@ class SecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            .cors { /* configurado em CorsConfig */ }
+            .cors { }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { it.anyRequest().permitAll() }
             .httpBasic { it.disable() }

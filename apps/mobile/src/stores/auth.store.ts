@@ -12,12 +12,6 @@ interface AuthState {
   switchRole: (role: UserRole) => void;
 }
 
-/**
- * Autenticação fake (entrega 1). Aceita qualquer email/senha e popula um usuário mock.
- *
- * TODO (entrega 2): substituir por chamada real ao endpoint /api/auth/login,
- * persistir token via expo-secure-store e adicionar interceptor HTTP.
- */
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,

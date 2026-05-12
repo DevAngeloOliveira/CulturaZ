@@ -1,6 +1,3 @@
--- Seed inicial das categorias visíveis na Home do marketplace.
--- ON CONFLICT garante idempotência em ambientes que rerodem a migração.
-
 INSERT INTO categories (name, description, icon, active) VALUES
     ('Acadêmicos', 'Livros didáticos, universitários e técnicos', 'school',  true),
     ('Técnicos',   'Computação, engenharia, ciências aplicadas',  'cpu',     true),
