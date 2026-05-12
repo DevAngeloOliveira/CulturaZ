@@ -17,18 +17,38 @@
   - [Sobre o projeto](#sobre-o-projeto)
   - [Problema que resolve](#problema-que-resolve)
   - [Proposta de valor](#proposta-de-valor)
-  - [Stack](#stack)
+  - [🛠 Stack](#-stack)
   - [Arquitetura geral](#arquitetura-geral)
-  - [Estrutura do monorepo](#estrutura-do-monorepo)
-  - [Como rodar localmente](#como-rodar-localmente)
+    - [🧩 Módulos da API (Kotlin + Spring Boot)](#-módulos-da-api-kotlin--spring-boot)
+  - [📱 Componentes \& Telas do Mobile (React Native + TypeScript)](#-componentes--telas-do-mobile-react-native--typescript)
+    - [Interface Component System](#interface-component-system)
+    - [Fluxos de Telas](#fluxos-de-telas)
+  - [🎯 Tipos de Dados (Domain Model)](#-tipos-de-dados-domain-model)
+    - [Entidades Principais](#entidades-principais)
+  - [🏗️ Estrutura do Monorepo](#️-estrutura-do-monorepo)
+  - [🚀 Como rodar localmente](#-como-rodar-localmente)
     - [Pré-requisitos](#pré-requisitos)
-    - [Setup inicial](#setup-inicial)
-    - [Comandos úteis](#comandos-úteis)
-  - [Documentação](#documentação)
-  - [Status do projeto](#status-do-projeto)
-  - [Roadmap](#roadmap)
-  - [Links úteis](#links-úteis)
-  - [Observação](#observação)
+    - [Setup inicial (5 minutos)](#setup-inicial-5-minutos)
+    - [📚 Acessar interfaces](#-acessar-interfaces)
+    - [🛠️ Comandos úteis](#️-comandos-úteis)
+    - [🔍 Troubleshooting](#-troubleshooting)
+  - [🎯 Próximas ações (Prioridade)](#-próximas-ações-prioridade)
+  - [📖 Documentação detalhada](#-documentação-detalhada)
+  - [📊 Status do projeto](#-status-do-projeto)
+    - [Entrega 1 — Fundação ✅ (Atual)](#entrega-1--fundação--atual)
+  - [🗺️ Roadmap até Entrega Final (30 de Junho)](#️-roadmap-até-entrega-final-30-de-junho)
+    - [Fase 1️⃣ — Fundação **(Até 31 de Maio) ✅ Em andamento**](#fase-1️⃣--fundação-até-31-de-maio--em-andamento)
+    - [Fase 2️⃣ — Autenticação + Catálogo **(1-15 de Junho)**](#fase-2️⃣--autenticação--catálogo-1-15-de-junho)
+    - [Fase 3️⃣ — Carrinho + Checkout + Pedidos **(16-22 de Junho)**](#fase-3️⃣--carrinho--checkout--pedidos-16-22-de-junho)
+    - [Fase 4️⃣ — Painel Vendedor + Admin MVP **(23-28 de Junho)**](#fase-4️⃣--painel-vendedor--admin-mvp-23-28-de-junho)
+    - [Fase 5️⃣ — Polish, Testes & Deploy **(29-30 de Junho)**](#fase-5️⃣--polish-testes--deploy-29-30-de-junho)
+    - [📋 Roadmap Futuro (Pós-Entrega)](#-roadmap-futuro-pós-entrega)
+  - [🤔 Por que essas tecnologias?](#-por-que-essas-tecnologias)
+    - [Mobile: React Native + Expo](#mobile-react-native--expo)
+    - [Backend: Kotlin + Spring Boot](#backend-kotlin--spring-boot)
+    - [Banco: PostgreSQL 16](#banco-postgresql-16)
+    - [Monorepo: pnpm workspaces](#monorepo-pnpm-workspaces)
+  - [🙏 Observação](#-observação)
 
 ---
 
@@ -72,8 +92,8 @@ O projeto é construído como um produto real em evolução, não como um trabal
 ## Arquitetura geral
 
 ```
-┌──────────────────┐        REST / JSON        ┌────────────────────┐
-│  Mobile (Expo)   │ ────────────────────────▶ │  API (Spring Boot) │
+┌──────────────────┐        REST / JSON         ┌────────────────────┐
+│  Mobile (Expo)   │ ─────────────────────────▶ │  API (Spring Boot) │
 │  React Native    │                            │  Kotlin · Java 21  │
 │  TypeScript      │ ◀───────────────────────── │  Monólito modular  │
 └──────────────────┘                            └──────────┬─────────┘
@@ -182,8 +202,6 @@ AdminDashboardScreen → ModeraçãoScreen → UsuáriosScreen
 ```
 
 ---
-
-## 🎯 Tipos de Dados (Domain Model)
 
 ## 🎯 Tipos de Dados (Domain Model)
 
@@ -462,180 +480,152 @@ O que ainda falta:
 
 ---
 
-## 🗺️ Roadmap Completo
+## 🗺️ Roadmap até Entrega Final (30 de Junho)
 
-### Fase 1️⃣ — Fundação **(Atual — Final de Maio)**
+> **Objetivo:** Marketplace funcional com fluxo completo de compra-venda, pronto para produção.
+
+### Fase 1️⃣ — Fundação **(Até 31 de Maio) ✅ Em andamento**
 ```
 [████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 60%
 ```
-**Escopo:** Estrutura do monorepo, documentação, Design System, telas públicas, esqueleto da API com domínios, docker-compose.
+**Escopo:**
+- ✅ Estrutura do monorepo (pnpm workspaces)
+- ✅ Design System completo (componentes, tokens)
+- ✅ Schema PostgreSQL (13 tabelas)
+- ✅ Esqueleto da API com domínios
+- ✅ Docker Compose + CI/CD basics
 
-**Próximos passos:** Finalizar JWT e testes unitários.
-
----
-
-### Fase 2️⃣ — Autenticação **(Junho)**
-```
-[░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
-```
-**O que fazer:**
-- Implementar JWT completo (Spring Security + token refresh)
-- Endpoints: POST `/auth/login`, `/auth/register`, `/auth/refresh`
-- Validação de email + confirm email flow
-- Roles & permissions (CUSTOMER, SELLER, ADMIN)
-- Testes unitários & testes de integração
-
-**Endpoints esperados:**
-```
-POST   /auth/login                    → JWT token + refresh token
-POST   /auth/register                 → Cria usuário com role CUSTOMER
-POST   /auth/confirm-email?token=xxx  → Confirma email
-POST   /auth/refresh                  → Novo access token via refresh
-POST   /auth/logout                   → Invalida sessão
-GET    /auth/me                       → Dados do usuário logado
-```
+**Próximo:** Finalizar JWT real
 
 ---
 
-### Fase 3️⃣ — Catálogo de Livros **(Julho)**
+### Fase 2️⃣ — Autenticação + Catálogo **(1-15 de Junho)**
 ```
 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
 ```
-**O que fazer:**
+**Priority:** 🔴 CRÍTICO — Base para todo o resto
+
+**Autenticação (JWT):**
+- Endpoints: `POST /auth/login`, `/auth/register`, `/auth/refresh`, `/auth/logout`
+- Spring Security + JWT tokens
+- Validação de email
+- Roles: CUSTOMER, SELLER, ADMIN
+
+**Catálogo (Books & Categories):**
 - CRUD completo de Books & Categories
-- Busca com filtros (categoria, preço, condição)
-- Endpoint de recomendações (bestsellers, novidades)
-- Tela "Detalhes do Livro" com seller info + reviews
-
-**Endpoints esperados:**
-```
-GET    /api/books                           → Lista com paginação & filtros
-GET    /api/books/:id                       → Detalhes completos
-GET    /api/books/search?q=termo            → Busca por título/autor
-GET    /api/categories                      → Árvore de categorias
-GET    /api/books/:id/reviews               → Avaliações do livro
-GET    /api/books/recommendations           → Bestsellers & novidades
-```
+- `GET /api/books` — Lista com paginação + filtros (categoria, preço, condição)
+- `GET /api/books/:id` — Detalhes do livro
+- `GET /api/books/search?q=termo` — Busca por título/autor/ISBN
+- `GET /api/categories` — Árvore de categorias
 
 **Telas no mobile:**
-- `MarketplaceHomeScreen` — Hero, categorias, destaques
-- `SearchScreen` — Busca com filtros avançados
-- `BookDetailScreen` — Descrição, preço, seller, reviews, carrinho
+- `LoginScreen` + `RegisterScreen` → JWT armazenado
+- `MarketplaceHomeScreen` — Categorias, destaques
+- `SearchScreen` — Busca com filtros
+- `BookDetailScreen` — Descrição, preço, seller, adicionar ao carrinho
 
 ---
 
-### Fase 4️⃣ — Carrinho & Checkout **(Agosto)**
+### Fase 3️⃣ — Carrinho + Checkout + Pedidos **(16-22 de Junho)**
 ```
 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
 ```
-**O que fazer:**
+**Priority:** 🔴 CRÍTICO — Monetização
+
+**Fluxo de Compra:**
 - Cart persistido (Zustand + localStorage)
-- Suporte a múltiplos vendedores no carrinho
-- Cálculo automático de frete (simulado)
-- Checkout com dados de entrega
-- **Pagamento simulado** (não integração real)
+- Multi-vendedor no mesmo carrinho
+- Cálculo automático de frete (simulado por agora)
 
-**Endpoints esperados:**
-```
-POST   /api/cart                    → Adiciona item ao carrinho
-DELETE /api/cart/:id                → Remove item
-GET    /api/cart                    → Retorna carrinho do usuário
-POST   /api/orders                  → Cria pedido (checkout)
-GET    /api/orders                  → Histórico de pedidos
-GET    /api/orders/:id              → Detalhes do pedido
-```
+**Endpoints:**
+- `POST /api/cart` — Adiciona item
+- `DELETE /api/cart/:id` — Remove item
+- `GET /api/cart` — Retorna carrinho
+- `POST /api/orders` — Cria pedido (checkout)
+- `GET /api/orders` — Histórico de pedidos
+- `GET /api/orders/:id` — Detalhes do pedido
+
+**Pagamento:** Simulado (badge "pago", sem integração real)
+
+**Telas no mobile:**
+- `CartScreen` — Resumo, frete, total
+- `CheckoutScreen` — Endereço de entrega
+- `OrderHistoryScreen` — Pedidos anteriores
 
 ---
 
-### Fase 5️⃣ — Painel de Vendedor **(Setembro)**
+### Fase 4️⃣ — Painel Vendedor + Admin MVP **(23-28 de Junho)**
 ```
 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
 ```
-**O que fazer:**
+**Priority:** 🟡 IMPORTANTE — Experiência completa
+
+**Painel Vendedor (MVP):**
 - Ativação de conta como seller
-- Dashboard com métricas (vendas, rating, top livros)
-- Gerenciamento de anúncios (criar, editar, ativar/desativar)
-- Histórico de vendas com status
+- Dashboard com métricas básicas (total de anúncios, vendas, rating)
+- Criar/editar/deletar anúncios
 
-**Endpoints esperados:**
-```
-POST   /api/sellers/activate                → Ativa conta como vendedor
-GET    /api/sellers/:id/dashboard           → Métricas de vendedor
-POST   /api/listings                        → Cria novo anúncio
-PATCH  /api/listings/:id                    → Edita anúncio
-DELETE /api/listings/:id                    → Remove anúncio
-GET    /api/sellers/:id/sales               → Histórico de vendas
-```
+**Endpoints:**
+- `POST /api/sellers/activate` — Ativa como vendedor
+- `GET /api/sellers/:id/dashboard` — Métricas
+- `POST /api/listings` — Cria anúncio
+- `PATCH /api/listings/:id` — Edita
+- `DELETE /api/listings/:id` — Remove
 
----
+**Painel Admin (MVP):**
+- Dashboard com métricas globais (GMV total, número de usuários, pedidos)
+- Lista de usuários com possibilidade de bloquear
 
-### Fase 6️⃣ — Painel Admin **(Outubro)**
-```
-[░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
-```
-**O que fazer:**
-- Dashboard com métricas globais (GMV, usuários, pedidos)
-- Moderação de usuários (bloquear, suspender)
-- Revisão de anúncios denunciados
-- Relatórios (vendas por período, sellers ativos)
+**Endpoints:**
+- `GET /api/admin/dashboard` — Métricas globais
+- `GET /api/admin/users` — Lista usuários
+- `PATCH /api/admin/users/:id/status` — Bloqueia/ativa usuário
 
-**Endpoints esperados:**
-```
-GET    /api/admin/dashboard              → Métricas globais
-GET    /api/admin/users                  → Lista de usuários (paginated)
-PATCH  /api/admin/users/:id/status       → Bloqueia/ativa usuário
-GET    /api/admin/reports                → Denúncias pendentes
-PATCH  /api/admin/reports/:id            → Resolve denúncia
-GET    /api/admin/analytics              → Relatórios
-```
+**Telas no mobile:**
+- `SellerDashboardScreen` — Métricas e ações rápidas
+- `ListingsScreen` — Lista de anúncios
+- `CreateListingScreen` — Criar novo anúncio
+- `AdminDashboardScreen` — Métricas e moderação básica
 
 ---
 
-### Fase 7️⃣ — Reputação & Avaliações **(Novembro)**
+### Fase 5️⃣ — Polish, Testes & Deploy **(29-30 de Junho)**
 ```
 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
 ```
-**O que fazer:**
-- Fluxo completo de reviews (pós-entrega, rating + comentário)
-- Cálculo de reputação do seller (média ponderada)
-- Audit log de ações (GDPR compliance)
+**Priority:** 🟠 REFINAMENTOS
 
-**Endpoints esperados:**
-```
-POST   /api/orders/:id/review            → Cria avaliação
-GET    /api/sellers/:id/reviews          → Reviews do seller
-GET    /api/sellers/:id/reputation       → Score de reputação
-GET    /api/admin/audit-log              → Histórico de ações
-```
+**Quality Assurance:**
+- Testes unitários (auth, cart, orders)
+- Testes de integração (API)
+- Testes E2E (fluxo comprador)
+
+**Refinamentos:**
+- Tratamento de erros melhorado
+- Loading states + feedback visual
+- Validações no front + back
+- Documentação Swagger/OpenAPI
+
+**Deploy:**
+- Build de produção (mobile)
+- Deploy da API (Docker + CI/CD)
+- Dados de seed (livros, categorias, vendedores)
+- Guia de uso para apresentação
 
 ---
 
-### Fase 8️⃣ — Pagamento & Frete Real **(Dezembro)**
-```
-[░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
-```
-**Integrações terceirizadas:**
-- Stripe / Mercado Pago para pagamento
-- Correios / ShipStation para frete
+## 📋 Roadmap Futuro (Pós-Entrega)
 
----
+Essas features ficarão para versão 2.0+ (não entram no deadline de junho):
 
-### Fase 9️⃣ — Chat & Notificações **(Janeiro 2026)**
-```
-[░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
-```
-- Chat em tempo real (WebSocket ou Firebase)
-- Notificações push
-
----
-
-### Fase 🔟 — Inteligência Artificial **(Fevereiro 2026)**
-```
-[░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
-```
-- Recomendações com ML
-- Busca semântica (vector embeddings)
-- Detecção de fraude
+| Feature | Descrição | Estimativa |
+|---------|-----------|-----------|
+| **Avaliações & Reputação** | Reviews do seller com stars e comentários | Julho |
+| **Pagamento Real** | Stripe / Mercado Pago integrado | Agosto |
+| **Frete Real** | Cálculo com Correios / Sedex | Agosto |
+| **Chat & Notificações** | WebSocket para mensagens em tempo real | Setembro |
+| **Analytics Avançado** | Relatórios e insights para sellers | Outubro |
+| **Recomendações ML** | Busca semântica e sugestões personalizadas | Novembro+ |
 
 - **Repositório:** https://github.com/DevAngeloOliveira/CulturaZ
 - **Figma — Design System v0.1:** https://www.figma.com/design/3GJETOFgD8T1Vkiwkbp4YU/CulturaZ
