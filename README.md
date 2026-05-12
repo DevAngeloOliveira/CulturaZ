@@ -12,18 +12,23 @@
 
 ## Sumário
 
-1. [Sobre o projeto](#sobre-o-projeto)
-2. [Problema que resolve](#problema-que-resolve)
-3. [Proposta de valor](#proposta-de-valor)
-4. [Stack](#stack)
-5. [Arquitetura geral](#arquitetura-geral)
-6. [Estrutura do monorepo](#estrutura-do-monorepo)
-7. [Como rodar localmente](#como-rodar-localmente)
-8. [Documentação](#documentação)
-9. [Status do projeto](#status-do-projeto)
-10. [Roadmap](#roadmap)
-11. [Links úteis](#links-úteis)
-12. [Observação](#observação)
+- [CulturaZ](#culturaz)
+  - [Sumário](#sumário)
+  - [Sobre o projeto](#sobre-o-projeto)
+  - [Problema que resolve](#problema-que-resolve)
+  - [Proposta de valor](#proposta-de-valor)
+  - [Stack](#stack)
+  - [Arquitetura geral](#arquitetura-geral)
+  - [Estrutura do monorepo](#estrutura-do-monorepo)
+  - [Como rodar localmente](#como-rodar-localmente)
+    - [Pré-requisitos](#pré-requisitos)
+    - [Setup inicial](#setup-inicial)
+    - [Comandos úteis](#comandos-úteis)
+  - [Documentação](#documentação)
+  - [Status do projeto](#status-do-projeto)
+  - [Roadmap](#roadmap)
+  - [Links úteis](#links-úteis)
+  - [Observação](#observação)
 
 ---
 
