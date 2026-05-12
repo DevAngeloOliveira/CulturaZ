@@ -9,56 +9,463 @@
 
 ---
 
-## Sumário
+## 📋 Sumário
 
-- [CulturaZ](#culturaz)
-  - [Sumário](#sumário)
-  - [Sobre o projeto](#sobre-o-projeto)
-  - [Problema que resolve](#problema-que-resolve)
-  - [Proposta de valor](#proposta-de-valor)
-  - [🛠 Stack](#-stack)
-  - [Arquitetura geral](#arquitetura-geral)
-    - [🧩 Módulos da API (Kotlin + Spring Boot)](#-módulos-da-api-kotlin--spring-boot)
-  - [📱 Componentes \& Telas do Mobile (React Native + TypeScript)](#-componentes--telas-do-mobile-react-native--typescript)
-    - [Interface Component System](#interface-component-system)
-    - [Fluxos de Telas](#fluxos-de-telas)
-  - [🎯 Tipos de Dados (Domain Model)](#-tipos-de-dados-domain-model)
-    - [Entidades Principais](#entidades-principais)
-  - [🏗️ Estrutura do Monorepo](#️-estrutura-do-monorepo)
-  - [🚀 Como rodar localmente](#-como-rodar-localmente)
-    - [Pré-requisitos](#pré-requisitos)
-    - [Setup inicial (5 minutos)](#setup-inicial-5-minutos)
-    - [📚 Acessar interfaces](#-acessar-interfaces)
-    - [🛠️ Comandos úteis](#️-comandos-úteis)
-    - [🔍 Troubleshooting](#-troubleshooting)
-  - [🎯 Próximas ações (Prioridade)](#-próximas-ações-prioridade)
-  - [📖 Documentação detalhada](#-documentação-detalhada)
-  - [📊 Status do projeto](#-status-do-projeto)
-    - [Entrega 1 — Fundação ✅ (Atual)](#entrega-1--fundação--atual)
-  - [🗺️ Roadmap até Entrega Final (30 de Junho)](#️-roadmap-até-entrega-final-30-de-junho)
-    - [Fase 1️⃣ — Fundação **(Até 31 de Maio) ✅ Em andamento**](#fase-1️⃣--fundação-até-31-de-maio--em-andamento)
-    - [Fase 2️⃣ — Autenticação + Catálogo **(1-15 de Junho)**](#fase-2️⃣--autenticação--catálogo-1-15-de-junho)
-    - [Fase 3️⃣ — Carrinho + Checkout + Pedidos **(16-22 de Junho)**](#fase-3️⃣--carrinho--checkout--pedidos-16-22-de-junho)
-    - [Fase 4️⃣ — Painel Vendedor + Admin MVP **(23-28 de Junho)**](#fase-4️⃣--painel-vendedor--admin-mvp-23-28-de-junho)
-    - [Fase 5️⃣ — Polish, Testes \& Deploy **(29-30 de Junho)**](#fase-5️⃣--polish-testes--deploy-29-30-de-junho)
-  - [📋 Roadmap Futuro (Pós-Entrega)](#-roadmap-futuro-pós-entrega)
-  - [🤔 Por que essas tecnologias?](#-por-que-essas-tecnologias)
-    - [Mobile: React Native + Expo](#mobile-react-native--expo)
-    - [Backend: Kotlin + Spring Boot](#backend-kotlin--spring-boot)
-    - [Banco: PostgreSQL 16](#banco-postgresql-16)
-    - [Monorepo: pnpm workspaces](#monorepo-pnpm-workspaces)
-  - [🙏 Observação](#-observação)
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [Problema](#-problema)
+- [Objetivos](#-objetivos)
+- [Público-Alvo & Personas](#-público-alvo--personas)
+- [Escopo Funcional](#-escopo-funcional)
+- [Stack Tecnológico](#-stack-tecnológico)
+- [Arquitetura](#-arquitetura)
+- [Estrutura do Monorepo](#-estrutura-do-monorepo)
+- [Como Rodar Localmente](#-como-rodar-localmente)
+- [Documentação](#-documentação)
+- [Especificação de Endpoints](#-especificação-de-endpoints)
+- [Modelo de Dados](#-modelo-de-dados)
+- [Requisitos Não-Funcionais](#-requisitos-não-funcionais)
 
 ---
 
-## Sobre o projeto
+## 🎯 Sobre o Projeto
 
-O **CulturaZ** é um marketplace especializado em livros — novos, usados e raros. Conecta **compradores**, **leitores**, **estudantes**, **sebos**, **pequenos vendedores** e **pessoas que desejam revender livros parados em casa**.
+**CulturaZ** é uma plataforma mobile-first para compra, venda e revenda de livros, conectando leitores, estudantes, sebos, pequenos vendedores e pessoas que desejam circular livros novos ou usados.
 
-O projeto é construído como um produto real em evolução, não como um trabalho acadêmico descartável. Cada decisão técnica (monorepo, monólito modular, separação mobile/API, design system codificado) reflete escolhas que um produto de mercado tomaria.
+A proposta é criar um marketplace literário onde usuários possam:
 
-## Problema que resolve
+- Comprar livros novos e usados de forma segura
+- Anunciar e gerenciar seus próprios livros para revenda
+- Acompanhar pedidos e transações
+- Avaliar e consultar reputação de vendedores
+- Participar de uma economia circular voltada ao conhecimento
 
+O projeto é desenvolvido com postura de **produto real em evolução**, não apenas como MVP acadêmico, permitindo evolução futura para pagamentos reais, frete integrado, notificações, moderação avançada e escalabilidade operacional.
+
+---
+
+## 🚨 Problema
+
+Muitas pessoas possuem livros parados em casa, enquanto estudantes, leitores e profissionais procuram livros com preços mais acessíveis. A revenda de livros acontece de forma fragmentada em grupos de WhatsApp, redes sociais, sebos físicos ou marketplaces genéricos.
+
+**Problemas identificados:**
+- Baixa organização e busca ineficiente de anúncios
+- Dificuldade de busca por título, autor, categoria ou ISBN
+- Pouca confiança entre comprador e vendedor
+- Ausência de reputação clara do vendedor
+- Baixa visibilidade para sebos e pequenos vendedores
+- Falta de experiência mobile especializada em livros
+
+---
+
+## 🎯 Objetivos
+
+### Objetivo Geral
+
+Desenvolver uma plataforma mobile-first para venda e revenda de livros, com aplicativo em React Native, API em Kotlin Spring Boot e banco PostgreSQL, permitindo que compradores, vendedores e administradores interajam em um ecossistema digital de marketplace literário.
+
+### Objetivos Específicos
+
+- ✅ Permitir cadastro e autenticação de usuários (JWT)
+- ✅ Suportar dois perfis: comprador e vendedor
+- ✅ Permitir cadastro, busca e filtros de livros
+- ✅ Implementar sistema de anúncios com moderação
+- ✅ Suportar favoritos e carrinho de compras
+- ✅ Viabilizar checkout com pagamento simulado
+- ✅ Rastrear pedidos e status
+- ✅ Implementar avaliações e reputação de vendedores
+- ✅ Oferecer painel administrativo
+- ✅ Preparar base técnica escalável para evolução futura
+
+---
+
+## 👥 Público-Alvo & Personas
+
+### Público-Alvo
+
+- Estudantes universitários
+- Leitores frequentes
+- Professores
+- Profissionais que compram livros técnicos
+- Pessoas que desejam vender livros usados
+- Sebos e pequenas livrarias
+- Clubes de leitura
+
+### Personas Principais
+
+**Lucas — Comprador Estudante**
+- Objetivo: encontrar livros acadêmicos com preço acessível
+- Dor: livros novos são caros; livros usados estão espalhados
+- Solução CulturaZ: busca por título, autor, preço, condição e reputação
+
+**Mariana — Revendedora Casual**
+- Objetivo: vender livros parados em casa
+- Dor: depende de redes sociais desorganizadas
+- Solução CulturaZ: criar loja simples, cadastrar anúncios, acompanhar pedidos
+
+**Sebo Página Viva — Vendedor Commercial**
+- Objetivo: digitalizar acervo e alcançar novos compradores
+- Dor: baixa presença digital, catálogo desorganizado
+- Solução CulturaZ: perfil de loja, catálogo estruturado, relatórios
+
+---
+
+## 📦 Escopo Funcional
+
+O CulturaZ deve contemplar os seguintes módulos:
+
+1. **Autenticação e Conta** — Cadastro, login, recuperação de senha
+2. **Perfil do Usuário** — Edição de dados, gerenciamento de endereços
+3. **Perfil de Vendedor** — Ativação, descrição, tipo (individual, bookstore, sebo)
+4. **Catálogo de Livros** — Listagem, busca, filtros, detalhes
+5. **Anúncios (Listings)** — Criar, editar, pausar, remover, moderar
+6. **Favoritos** — Salvar livros para consulta posterior
+7. **Carrinho** — Multi-vendedor, validação de estoque
+8. **Checkout** — Seleção de endereço, pagamento simulado
+9. **Pedidos** — Criação, rastreamento, histórico
+10. **Avaliações & Reputação** — Reviews de vendedor, cálculo de rating
+11. **Administração** — Dashboard, gestão de usuários, moderação
+12. **Moderação** — Aprovação/bloqueio de anúncios, verificação de conteúdo
+13. **Categorias** — Gestão hierárquica de categorias
+14. **Relatórios** — Métricas para vendedor e admin
+
+---
+
+## 🛠️ Stack Tecnológico
+
+| Camada | Tecnologia |
+|--------|-----------|
+| **Mobile** | React Native + Expo (managed) + TypeScript |
+| **Backend** | Kotlin 1.9 + Spring Boot 3.3 + Java 21 |
+| **Banco de Dados** | PostgreSQL 16 |
+| **Migrações** | Flyway |
+| **API** | REST (OpenAPI 3.1) |
+| **Autenticação** | JWT |
+| **Build Backend** | Gradle Kotlin DSL |
+| **Contêineres** | Docker Compose |
+| **Monorepo** | pnpm workspaces |
+| **Navegação Mobile** | React Navigation v6 |
+| **Estado Mobile** | Zustand |
+| **CI/CD** | GitHub Actions |
+
+---
+
+## 🏗️ Arquitetura
+
+### Arquitetura Inicial (MVP)
+
+```
+React Native App (Expo)
+      |
+      | HTTPS / REST
+      v
+Kotlin Spring Boot API (Monólito Modular)
+      |
+      v
+PostgreSQL 16
+```
+
+### Arquitetura Evolutiva
+
+```
+React Native App
+      |
+API Gateway / Load Balancer
+      |
+Kotlin Spring Boot API
+      |
+      ├── PostgreSQL
+      ├── Redis (cache)
+      ├── Object Storage (imagens)
+      ├── Message Broker (eventos)
+      ├── Payment Gateway
+      ├── Shipping Provider
+      └── Notification Provider
+```
+
+### Módulos da API (Monólito Modular)
+
+```
+auth (autenticação e tokens)
+users (perfis e endereços)
+sellers (vendedores e reputação)
+books (catálogo de livros)
+categories (categorias e tags)
+listings (anúncios de livros)
+favorites (sistema de favoritos)
+cart (carrinho de compras)
+orders (pedidos e rastreamento)
+reviews (avaliações e ratings)
+admin (painel administrativo)
+reports (denúncias e auditoria)
+shared (configurações globais)
+```
+
+---
+
+## 🏢 Estrutura do Monorepo
+
+```
+CulturaZ/
+├── apps/
+│   ├── mobile/
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   ├── components/
+│   │   │   ├── screens/
+│   │   │   ├── services/
+│   │   │   ├── stores/
+│   │   │   ├── types/
+│   │   │   ├── hooks/
+│   │   │   ├── theme/
+│   │   │   └── utils/
+│   │   ├── app.json
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   └── api/
+│       ├── src/main/kotlin/com/culturaz/api/
+│       ├── src/main/resources/
+│       ├── build.gradle.kts
+│       └── Dockerfile
+│
+├── packages/
+│   └── contracts/
+│       ├── openapi.yaml
+│       └── README.md
+│
+├── docs/
+│   ├── requisitos.md
+│   ├── arquitetura.md
+│   ├── banco-de-dados.md
+│   ├── regras-de-negocio.md
+│   ├── api-contracts.md
+│   └── figma-ui-ux.md
+│
+├── infra/
+│   ├── docker-compose.yml
+│   └── postgres/init/
+│
+├── .github/workflows/
+│
+├── README.md
+├── pnpm-workspace.yaml
+└── package.json
+```
+
+---
+
+## 🚀 Como Rodar Localmente
+
+### Pré-requisitos
+
+- **Node.js 20+** e **pnpm 9+** (`npm i -g pnpm`)
+- **Java 21** (Temurin recomendado)
+- **Docker Desktop** com Docker Compose
+- **Git** para clonar
+
+### Setup Inicial (5 minutos)
+
+```bash
+# 1. Clonar repositório
+git clone https://github.com/DevAngeloOliveira/CulturaZ.git
+cd CulturaZ
+
+# 2. Copiar variáveis de ambiente
+cp .env.example .env
+
+# 3. Instalar dependências
+pnpm install
+
+# 4. Subir banco de dados
+pnpm infra:up
+
+# Abra novo terminal para os próximos passos
+
+# 5. Terminal 2: Rodar API
+pnpm api:run
+# ✅ API em http://localhost:8080
+
+# 6. Terminal 3: Rodar mobile
+pnpm mobile
+# ✅ Abra QR code no Expo Go
+```
+
+### Interfaces Disponíveis
+
+| Interface | URL | Credenciais |
+|-----------|-----|-------------|
+| Adminer (DB) | http://localhost:8081 | culturaz / culturaz |
+| API Health | http://localhost:8080/actuator/health | — |
+| Swagger (em desenvolvimento) | http://localhost:8080/swagger-ui | — |
+
+### Comandos Úteis
+
+```bash
+# Mobile
+pnpm mobile              # Expo Dev Server
+pnpm mobile:typecheck    # Verificar tipos TS
+
+# API
+pnpm api:run             # Iniciar Spring Boot
+pnpm api:build           # Build + testes
+
+# Infra
+pnpm infra:up            # Subir PostgreSQL + Adminer
+pnpm infra:down          # Parar containers
+```
+
+---
+
+## 📚 Documentação
+
+Documentação completa em [docs/](docs/):
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| [requisitos.md](docs/requisitos.md) | Requisitos funcionais, personas, escopo |
+| [arquitetura.md](docs/arquitetura.md) | Visão técnica, decisões arquiteturais |
+| [banco-de-dados.md](docs/banco-de-dados.md) | Schema, ERD, índices |
+| [regras-de-negocio.md](docs/regras-de-negocio.md) | Regras numeradas (RN-xxx) |
+| [api-contracts.md](docs/api-contracts.md) | Endpoints REST |
+| [figma-ui-ux.md](docs/figma-ui-ux.md) | Design System, tokens, fluxos |
+
+---
+
+## 📡 Especificação de Endpoints
+
+### Auth
+
+```http
+POST   /api/auth/register
+POST   /api/auth/login
+POST   /api/auth/logout
+GET    /api/auth/me
+POST   /api/auth/refresh
+```
+
+### Catálogo
+
+```http
+GET    /api/books                  # Lista com paginação
+GET    /api/books/{id}             # Detalhes
+GET    /api/books/search?q=termo   # Busca
+GET    /api/categories             # Categorias
+```
+
+### Anúncios
+
+```http
+GET    /api/listings
+POST   /api/seller/listings        # Criar
+PUT    /api/seller/listings/{id}   # Editar
+PATCH  /api/seller/listings/{id}/pause
+```
+
+### Carrinho e Pedidos
+
+```http
+GET    /api/cart
+POST   /api/cart/items
+POST   /api/orders                 # Checkout
+GET    /api/orders/me              # Meus pedidos
+```
+
+### Vendedor
+
+```http
+POST   /api/sellers                # Ativar
+GET    /api/sellers/me/dashboard
+GET    /api/seller/orders
+```
+
+### Admin
+
+```http
+GET    /api/admin/dashboard
+GET    /api/admin/users
+PATCH  /api/admin/users/{id}/block
+```
+
+---
+
+## 🗄️ Modelo de Dados
+
+### Entidades Principais
+
+**User**
+```
+- id: UUID
+- name, email, phone
+- passwordHash
+- status: ACTIVE | BLOCKED | PENDING_VERIFICATION | DELETED
+- roles: CUSTOMER | SELLER | ADMIN
+```
+
+**Book**
+```
+- id: UUID
+- title, author, publisher, isbn
+- categoryId
+```
+
+**BookListing**
+```
+- id: UUID
+- bookId, sellerId
+- price, stockQuantity
+- condition: NEW | LIKE_NEW | GOOD | FAIR | DAMAGED
+- status: PENDING_REVIEW | ACTIVE | PAUSED | BLOCKED | SOLD_OUT
+```
+
+**Order**
+```
+- id: UUID
+- buyerId, status, paymentStatus
+- items (múltiplos vendedores)
+- subtotalAmount, shippingAmount, totalAmount
+```
+
+**SellerProfile**
+```
+- id: UUID
+- userId, storeName, type
+- rating, status
+```
+
+**Review**
+```
+- id: UUID
+- orderId, sellerId, reviewerId
+- rating (1-5), comment, tags
+```
+
+---
+
+## ⚡ Requisitos Não-Funcionais
+
+| Aspecto | Descrição |
+|---------|-----------|
+| **Desempenho** | Listagens paginadas, busca com índices, resposta <500ms |
+| **Escalabilidade** | Backend stateless, JWT, preparado para Redis e filas |
+| **Segurança** | Senhas com bcrypt, autenticação em todos endpoints, auditoria |
+| **Manutenibilidade** | Monorepo organizado, separação de responsabilidades, Clean Code |
+| **Usabilidade** | Busca sempre visível, ações em poucos toques, validações claras |
+| **Observabilidade** | Logs estruturados, rastreamento de eventos críticos |
+
+---
+
+## 🔗 Links Úteis
+
+- **Repositório:** https://github.com/DevAngeloOliveira/CulturaZ
+- **Figma — Design System v0.1:** https://www.figma.com/design/3GJETOFgD8T1Vkiwkbp4YU/CulturaZ
+- **Figma — Fluxo completo (29 telas):** [node 1:515 no Figma]
+- **Figma — Home refinada:** [node 1:2176 no Figma]
+
+---
+
+## 📝 Observação
+
+Este projeto é desenvolvido em contexto acadêmico, mas é **modelado como produto real**: arquitetura escalável, documentação profissional, separação clara de responsabilidades, padrões de mercado. O objetivo é servir como portfólio técnico e demonstrar capacidade de levar um produto da ideia à fundação executável.
 - **Para compradores:** livros novos são caros e a oferta de usados está espalhada em marketplaces genéricos onde a busca por título/edição é frustrante.
 - **Para sebos e vendedores pequenos:** dependem de plataformas pesadas, com taxas altas e sem foco em livro como categoria.
 - **Para quem tem livros parados em casa:** falta um canal simples para revender e dar nova vida ao acervo.
