@@ -18,7 +18,7 @@ spring:
         jdbc:
           time_zone: UTC
         format_sql: false
-    open-in-view: false
+    open-in-view: true
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -47,6 +47,14 @@ springdoc:
     operations-sorter: alpha
     tags-sorter: alpha
 
+culturaz:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:dev-only-secret-please-replace-with-a-random-256-bit-key-in-production-environments}
+      access-token-expiration-seconds: ${JWT_ACCESS_TOKEN_EXPIRATION_SECONDS:3600}
+      refresh-token-expiration-seconds: ${JWT_REFRESH_TOKEN_EXPIRATION_SECONDS:2592000}
+      issuer: culturaz-api
+
 logging:
   level:
     root: INFO
@@ -67,16 +75,17 @@ spring:
   config:
     activate:
       on-profile: test
-  datasource:
-    url: jdbc:h2:mem:culturaz_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
-    username: sa
-    password: ""
-    driver-class-name: org.h2.Driver
-  flyway:
-    enabled: false
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
+logging:
+  level:
+    org.testcontainers: INFO
+    com.github.dockerjava: WARN
+culturaz:
+  security:
+    jwt:
+      secret: test-only-secret-must-be-long-enough-to-satisfy-hmac-sha256-key-requirement-padding-padding
 
 ---
 spring:

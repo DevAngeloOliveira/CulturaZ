@@ -1,817 +1,2467 @@
-openapi: 3.1.0
+openapi: 3.0.1
 info:
   title: CulturaZ API
-  version: 0.1.0
-  description: |
-    Contratos REST do CulturaZ — marketplace de livros.
-
-    **Status:** Entrega 1 (fundação). A maioria dos endpoints está documentada
-    mas ainda não implementada. Cada módulo expõe um endpoint `GET /api/{module}/health`
-    que confirma que o pacote subiu.
-
-    Convenções:
-    - Datas em ISO 8601 UTC (`2025-05-12T14:30:00Z`).
-    - Dinheiro como string para preservar precisão (`"34.90"`).
-    - Paginação por `page` (0-based) e `size` (default 20, max 100).
-    - Erros via envelope padrão `Error`.
+  description: API REST do marketplace CulturaZ.
   contact:
     name: Ângelo Oliveira
     email: dev.angelooliveira@gmail.com
   license:
     name: MIT
-
+  version: 0.2.0
 servers:
-  - url: http://localhost:8080
-    description: Local dev
-
-tags:
-  - name: Auth
-  - name: Users
-  - name: Sellers
-  - name: Categories
-  - name: Books
-  - name: Listings
-  - name: Favorites
-  - name: Cart
-  - name: Orders
-  - name: Reviews
-  - name: Admin
-  - name: Health
-
+- url: http://localhost:8080
+  description: Generated server url
 paths:
-  /actuator/health:
-    get:
-      tags: [Health]
-      summary: Health check geral (Spring Boot Actuator)
-      responses:
-        '200':
-          description: API saudável
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string, example: UP }
-
-  /api/auth/register:
-    post:
-      tags: [Auth]
-      summary: Cadastra novo usuário
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/RegisterRequest' }
-      responses:
-        '201':
-          description: Usuário criado
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/AuthResponse' }
-        '400': { $ref: '#/components/responses/ValidationError' }
-        '409': { $ref: '#/components/responses/Conflict' }
-
-  /api/auth/login:
-    post:
-      tags: [Auth]
-      summary: Autentica e devolve JWT
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/LoginRequest' }
-      responses:
-        '200':
-          description: Autenticado
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/AuthResponse' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-
-  /api/auth/logout:
-    post:
-      tags: [Auth]
-      summary: Invalida refresh token
-      security: [{ bearerAuth: [] }]
-      responses:
-        '204': { description: Logout ok }
-
-  /api/auth/me:
-    get:
-      tags: [Auth]
-      summary: Usuário autenticado atual
-      security: [{ bearerAuth: [] }]
-      responses:
-        '200':
-          description: Perfil
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/User' }
-        '401': { $ref: '#/components/responses/Unauthorized' }
-
   /api/users/me:
     get:
-      tags: [Users]
-      summary: Perfil do usuário autenticado
-      security: [{ bearerAuth: [] }]
+      tags:
+      - user-controller
+      operationId: me
       responses:
-        '200':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
-              schema: { $ref: '#/components/schemas/User' }
-    put:
-      tags: [Users]
-      summary: Atualiza nome/telefone
-      security: [{ bearerAuth: [] }]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '#/components/schemas/UpdateUserRequest' }
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/User' }
-
-  /api/users/me/addresses:
-    get:
-      tags: [Users]
-      summary: Lista endereços
-      security: [{ bearerAuth: [] }]
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Address' }
-    post:
-      tags: [Users]
-      summary: Cria endereço
-      security: [{ bearerAuth: [] }]
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - user-controller
+      operationId: updateMe
       requestBody:
-        required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/AddressRequest' }
-      responses:
-        '201':
-          description: ok
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Address' }
-
-  /api/sellers:
-    post:
-      tags: [Sellers]
-      summary: Ativa perfil de vendedor para o usuário autenticado
-      security: [{ bearerAuth: [] }]
-      requestBody:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
         required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - bearerAuth: []
+  /api/users/me/addresses/{id}:
+    put:
+      tags:
+      - address-controller
+      operationId: update
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateSellerRequest' }
+            schema:
+              $ref: "#/components/schemas/AddressRequest"
+        required: true
       responses:
-        '201':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SellerProfile' }
-
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AddressResponse"
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - address-controller
+      operationId: delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+      - bearerAuth: []
   /api/sellers/me:
     get:
-      tags: [Sellers]
-      summary: Meu perfil de vendedor
-      security: [{ bearerAuth: [] }]
+      tags:
+      - seller-controller
+      operationId: me_1
       responses:
-        '200':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SellerProfile' }
-
-  /api/sellers/{id}:
-    get:
-      tags: [Sellers]
-      summary: Perfil público de vendedor
-      parameters:
-        - $ref: '#/components/parameters/IdPath'
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/SellerProfile' }
-        '404': { $ref: '#/components/responses/NotFound' }
-
-  /api/categories:
-    get:
-      tags: [Categories]
-      summary: Lista categorias ativas
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
+            '*/*':
               schema:
-                type: array
-                items: { $ref: '#/components/schemas/Category' }
-
-  /api/books:
-    get:
-      tags: [Books]
-      summary: Busca catálogo bibliográfico
-      parameters:
-        - in: query
-          name: q
-          schema: { type: string }
-        - $ref: '#/components/parameters/PageQuery'
-        - $ref: '#/components/parameters/SizeQuery'
+                $ref: "#/components/schemas/SellerProfileResponse"
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - seller-controller
+      operationId: updateMe_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSellerRequest"
+        required: true
       responses:
-        '200':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
+            '*/*':
               schema:
-                $ref: '#/components/schemas/PagedBook'
-
+                $ref: "#/components/schemas/SellerProfileResponse"
+      security:
+      - bearerAuth: []
+  /api/seller/listings/{id}:
+    put:
+      tags:
+      - seller-listing-controller
+      operationId: update_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateListingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListingResponse"
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - seller-listing-controller
+      operationId: delete_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+      - bearerAuth: []
+  /api/cart/items/{id}:
+    put:
+      tags:
+      - cart-controller
+      operationId: updateItem
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCartItemRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - cart-controller
+      operationId: removeItem
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+      security:
+      - bearerAuth: []
   /api/books/{id}:
     get:
-      tags: [Books]
-      summary: Detalhes de um livro
+      tags:
+      - book-controller
+      operationId: getById_3
       parameters:
-        - $ref: '#/components/parameters/IdPath'
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Book' }
-        '404': { $ref: '#/components/responses/NotFound' }
-
-  /api/listings:
-    get:
-      tags: [Listings]
-      summary: Catálogo público de anúncios
-      parameters:
-        - in: query
-          name: q
-          schema: { type: string }
-        - in: query
-          name: category
-          schema: { type: string, format: uuid }
-        - in: query
-          name: condition
-          schema: { $ref: '#/components/schemas/BookCondition' }
-        - in: query
-          name: priceMin
-          schema: { type: string }
-        - in: query
-          name: priceMax
-          schema: { type: string }
-        - $ref: '#/components/parameters/PageQuery'
-        - $ref: '#/components/parameters/SizeQuery'
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/PagedListing' }
-
-  /api/listings/{id}:
-    get:
-      tags: [Listings]
-      summary: Detalhes de anúncio
-      parameters:
-        - $ref: '#/components/parameters/IdPath'
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/BookListing' }
-        '404': { $ref: '#/components/responses/NotFound' }
-
-  /api/seller/listings:
-    post:
-      tags: [Listings]
-      summary: Cria anúncio (vendedor)
-      security: [{ bearerAuth: [] }]
-      requestBody:
+      - name: id
+        in: path
         required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+    put:
+      tags:
+      - book-controller
+      operationId: update_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateListingRequest' }
+            schema:
+              $ref: "#/components/schemas/UpdateBookRequest"
+        required: true
       responses:
-        '201':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
-              schema: { $ref: '#/components/schemas/BookListing' }
-
-  /api/favorites:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/categories/{id}:
+    put:
+      tags:
+      - category-controller
+      operationId: update_3
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCategoryRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CategoryResponse"
+      security:
+      - bearerAuth: []
+  /api/users/me/addresses:
     get:
-      tags: [Favorites]
-      summary: Meus favoritos
-      security: [{ bearerAuth: [] }]
+      tags:
+      - address-controller
+      operationId: list
       responses:
-        '200':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
+            '*/*':
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/BookListing' }
-
-  /api/favorites/{listingId}:
+                items:
+                  $ref: "#/components/schemas/AddressResponse"
+      security:
+      - bearerAuth: []
     post:
-      tags: [Favorites]
-      summary: Favoritar
-      security: [{ bearerAuth: [] }]
-      parameters:
-        - in: path
-          name: listingId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '201': { description: Favoritado }
-        '409': { $ref: '#/components/responses/Conflict' }
-    delete:
-      tags: [Favorites]
-      summary: Desfavoritar
-      security: [{ bearerAuth: [] }]
-      parameters:
-        - in: path
-          name: listingId
-          required: true
-          schema: { type: string, format: uuid }
-      responses:
-        '204': { description: Removido }
-
-  /api/cart:
-    get:
-      tags: [Cart]
-      summary: Meu carrinho
-      security: [{ bearerAuth: [] }]
-      responses:
-        '200':
-          description: ok
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Cart' }
-    delete:
-      tags: [Cart]
-      summary: Esvaziar carrinho
-      security: [{ bearerAuth: [] }]
-      responses:
-        '204': { description: ok }
-
-  /api/cart/items:
-    post:
-      tags: [Cart]
-      summary: Adicionar item
-      security: [{ bearerAuth: [] }]
+      tags:
+      - address-controller
+      operationId: create
       requestBody:
-        required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/AddCartItemRequest' }
-      responses:
-        '201':
-          description: ok
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Cart' }
-
-  /api/orders:
-    post:
-      tags: [Orders]
-      summary: Criar pedido a partir do carrinho
-      security: [{ bearerAuth: [] }]
-      requestBody:
+            schema:
+              $ref: "#/components/schemas/AddressRequest"
         required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AddressResponse"
+      security:
+      - bearerAuth: []
+  /api/sellers:
+    post:
+      tags:
+      - seller-controller
+      operationId: activate
+      requestBody:
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateOrderRequest' }
+            schema:
+              $ref: "#/components/schemas/CreateSellerRequest"
+        required: true
       responses:
-        '201':
-          description: Pedido criado
+        "200":
+          description: OK
           content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Order' }
-
-  /api/orders/me:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SellerProfileResponse"
+      security:
+      - bearerAuth: []
+  /api/seller/listings:
     get:
-      tags: [Orders]
-      summary: Meus pedidos
-      security: [{ bearerAuth: [] }]
+      tags:
+      - seller-listing-controller
+      operationId: listMine_1
       parameters:
-        - $ref: '#/components/parameters/PageQuery'
-        - $ref: '#/components/parameters/SizeQuery'
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: "createdAt,desc"
       responses:
-        '200':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
-              schema: { $ref: '#/components/schemas/PagedOrder' }
-
-  /api/orders/{id}:
-    get:
-      tags: [Orders]
-      summary: Detalhes de pedido
-      security: [{ bearerAuth: [] }]
-      parameters:
-        - $ref: '#/components/parameters/IdPath'
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseListingResponse"
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - seller-listing-controller
+      operationId: create_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListingRequest"
+        required: true
       responses:
-        '200':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Order' }
-
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListingResponse"
+      security:
+      - bearerAuth: []
   /api/reviews:
     post:
-      tags: [Reviews]
-      summary: Avalia vendedor após pedido entregue
-      security: [{ bearerAuth: [] }]
+      tags:
+      - review-controller
+      operationId: create_2
       requestBody:
-        required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateReviewRequest' }
+            schema:
+              $ref: "#/components/schemas/CreateReviewRequest"
+        required: true
       responses:
-        '201':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Review' }
-
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ReviewResponse"
+      security:
+      - bearerAuth: []
+  /api/orders:
+    post:
+      tags:
+      - buyer-order-controller
+      operationId: create_3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+      security:
+      - bearerAuth: []
+  /api/favorites/{listingId}:
+    post:
+      tags:
+      - favorite-controller
+      operationId: add
+      parameters:
+      - name: listingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/FavoriteResponse"
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - favorite-controller
+      operationId: remove
+      parameters:
+      - name: listingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+      security:
+      - bearerAuth: []
+  /api/cart/items:
+    post:
+      tags:
+      - cart-controller
+      operationId: addItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddCartItemRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+      security:
+      - bearerAuth: []
+  /api/books:
+    get:
+      tags:
+      - book-controller
+      operationId: search_1
+      parameters:
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: categoryId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: author
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: isbn
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: "title,asc"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseBookResponse"
+    post:
+      tags:
+      - book-controller
+      operationId: create_4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/BookResponse"
+      security:
+      - bearerAuth: []
+  /api/auth/register:
+    post:
+      tags:
+      - auth-controller
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /api/auth/refresh:
+    post:
+      tags:
+      - auth-controller
+      operationId: refresh
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /api/auth/logout:
+    post:
+      tags:
+      - auth-controller
+      operationId: logout
+      responses:
+        "200":
+          description: OK
+      security:
+      - bearerAuth: []
+  /api/auth/login:
+    post:
+      tags:
+      - auth-controller
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /api/admin/categories:
+    post:
+      tags:
+      - category-controller
+      operationId: create_5
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CategoryResponse"
+      security:
+      - bearerAuth: []
+  /api/users/me/addresses/{id}/default:
+    patch:
+      tags:
+      - address-controller
+      operationId: setDefault
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AddressResponse"
+      security:
+      - bearerAuth: []
+  /api/seller/orders/{id}/status:
+    patch:
+      tags:
+      - seller-order-controller
+      operationId: updateStatus
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderStatusRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+      security:
+      - bearerAuth: []
+  /api/seller/listings/{id}/pause:
+    patch:
+      tags:
+      - seller-listing-controller
+      operationId: pause
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListingResponse"
+      security:
+      - bearerAuth: []
+  /api/seller/listings/{id}/activate:
+    patch:
+      tags:
+      - seller-listing-controller
+      operationId: activate_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListingResponse"
+      security:
+      - bearerAuth: []
+  /api/orders/{id}/cancel:
+    patch:
+      tags:
+      - buyer-order-controller
+      operationId: cancel
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CancelOrderRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/users/{id}/unblock:
+    patch:
+      tags:
+      - admin-controller
+      operationId: unblockUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminUserResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/users/{id}/block:
+    patch:
+      tags:
+      - admin-controller
+      operationId: blockUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlockUserRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminUserResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/listings/{id}/block:
+    patch:
+      tags:
+      - admin-listing-controller
+      operationId: block
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModerateListingRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListingResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/listings/{id}/approve:
+    patch:
+      tags:
+      - admin-listing-controller
+      operationId: approve
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListingResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/categories/{id}/deactivate:
+    patch:
+      tags:
+      - category-controller
+      operationId: deactivate
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CategoryResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/categories/{id}/activate:
+    patch:
+      tags:
+      - category-controller
+      operationId: activate_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CategoryResponse"
+      security:
+      - bearerAuth: []
+  /api/sellers/{id}:
+    get:
+      tags:
+      - seller-controller
+      operationId: getById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SellerProfileResponse"
+  /api/sellers/{id}/reviews:
+    get:
+      tags:
+      - seller-controller
+      operationId: reviews
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReviewResponse"
+  /api/sellers/me/reputation:
+    get:
+      tags:
+      - seller-controller
+      operationId: reputation
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SellerReputationResponse"
+      security:
+      - bearerAuth: []
+  /api/sellers/me/dashboard:
+    get:
+      tags:
+      - seller-controller
+      operationId: dashboard
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SellerDashboardResponse"
+      security:
+      - bearerAuth: []
+  /api/seller/orders:
+    get:
+      tags:
+      - seller-order-controller
+      operationId: listMine
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseOrderResponse"
+      security:
+      - bearerAuth: []
+  /api/seller/orders/{id}:
+    get:
+      tags:
+      - seller-order-controller
+      operationId: getOne
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+      security:
+      - bearerAuth: []
+  /api/orders/{id}:
+    get:
+      tags:
+      - buyer-order-controller
+      operationId: getMine
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+      security:
+      - bearerAuth: []
+  /api/orders/me:
+    get:
+      tags:
+      - buyer-order-controller
+      operationId: listMine_2
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseOrderResponse"
+      security:
+      - bearerAuth: []
+  /api/listings:
+    get:
+      tags:
+      - public-listing-controller
+      operationId: search
+      parameters:
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: categoryId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+      - name: condition
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - NEW
+          - LIKE_NEW
+          - GOOD
+          - FAIR
+          - DAMAGED
+      - name: priceMin
+        in: query
+        required: false
+        schema:
+          type: number
+      - name: priceMax
+        in: query
+        required: false
+        schema:
+          type: number
+      - name: city
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          default: "createdAt,desc"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseListingResponse"
+  /api/listings/{id}:
+    get:
+      tags:
+      - public-listing-controller
+      operationId: getById_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ListingResponse"
+  /api/favorites:
+    get:
+      tags:
+      - favorite-controller
+      operationId: list_1
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FavoriteResponse"
+      security:
+      - bearerAuth: []
+  /api/categories:
+    get:
+      tags:
+      - category-controller
+      operationId: list_2
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryResponse"
+  /api/categories/{id}:
+    get:
+      tags:
+      - category-controller
+      operationId: getById_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CategoryResponse"
+  /api/cart:
+    get:
+      tags:
+      - cart-controller
+      operationId: current
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CartResponse"
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - cart-controller
+      operationId: clear
+      responses:
+        "200":
+          description: OK
+      security:
+      - bearerAuth: []
+  /api/auth/me:
+    get:
+      tags:
+      - auth-controller
+      operationId: me_2
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/users:
+    get:
+      tags:
+      - admin-controller
+      operationId: listUsers
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - BLOCKED
+          - PENDING_VERIFICATION
+          - DELETED
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseAdminUserResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/users/{id}:
+    get:
+      tags:
+      - admin-controller
+      operationId: getUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminUserResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/orders:
+    get:
+      tags:
+      - admin-order-controller
+      operationId: list_3
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseOrderResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/orders/{id}:
+    get:
+      tags:
+      - admin-order-controller
+      operationId: getOne_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/listings:
+    get:
+      tags:
+      - admin-listing-controller
+      operationId: list_4
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - PENDING_REVIEW
+          - ACTIVE
+          - PAUSED
+          - BLOCKED
+          - SOLD_OUT
+          - REMOVED
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedResponseListingResponse"
+      security:
+      - bearerAuth: []
   /api/admin/dashboard:
     get:
-      tags: [Admin]
-      summary: Dashboard administrativo
-      security: [{ bearerAuth: [] }]
+      tags:
+      - admin-controller
+      operationId: dashboard_1
       responses:
-        '200':
-          description: ok
+        "200":
+          description: OK
           content:
-            application/json:
-              schema: { $ref: '#/components/schemas/AdminDashboard' }
-
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminDashboardResponse"
+      security:
+      - bearerAuth: []
+  /api/admin/categories/listing:
+    get:
+      tags:
+      - admin-category-listing-controller
+      operationId: listAll
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryResponse"
+      security:
+      - bearerAuth: []
 components:
+  schemas:
+    UpdateUserRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 120
+          minLength: 2
+          type: string
+        phone:
+          maxLength: 20
+          minLength: 0
+          type: string
+    UserResponse:
+      required:
+      - createdAt
+      - email
+      - id
+      - name
+      - roles
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - BLOCKED
+          - PENDING_VERIFICATION
+          - DELETED
+        roles:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - CUSTOMER
+            - SELLER
+            - ADMIN
+            - SUPPORT
+        createdAt:
+          type: string
+          format: date-time
+    AddressRequest:
+      required:
+      - city
+      - isDefault
+      - label
+      - neighborhood
+      - number
+      - postalCode
+      - recipient
+      - state
+      - street
+      type: object
+      properties:
+        label:
+          maxLength: 60
+          minLength: 0
+          type: string
+        recipient:
+          maxLength: 120
+          minLength: 0
+          type: string
+        street:
+          maxLength: 200
+          minLength: 0
+          type: string
+        number:
+          maxLength: 20
+          minLength: 0
+          type: string
+        complement:
+          maxLength: 120
+          minLength: 0
+          type: string
+        neighborhood:
+          maxLength: 120
+          minLength: 0
+          type: string
+        city:
+          maxLength: 120
+          minLength: 0
+          type: string
+        state:
+          maxLength: 2
+          minLength: 2
+          type: string
+        postalCode:
+          maxLength: 20
+          minLength: 0
+          type: string
+        isDefault:
+          type: boolean
+    AddressResponse:
+      required:
+      - city
+      - createdAt
+      - id
+      - isDefault
+      - label
+      - neighborhood
+      - number
+      - postalCode
+      - recipient
+      - state
+      - street
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+        recipient:
+          type: string
+        street:
+          type: string
+        number:
+          type: string
+        complement:
+          type: string
+        neighborhood:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        isDefault:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+    UpdateSellerRequest:
+      required:
+      - storeName
+      - type
+      type: object
+      properties:
+        storeName:
+          maxLength: 160
+          minLength: 2
+          type: string
+        description:
+          maxLength: 2000
+          minLength: 0
+          type: string
+        type:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - BOOKSTORE
+          - SEBO
+    SellerProfileResponse:
+      required:
+      - id
+      - rating
+      - status
+      - storeName
+      - type
+      - userId
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        storeName:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - BOOKSTORE
+          - SEBO
+        rating:
+          type: number
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - SUSPENDED
+          - PENDING_REVIEW
+    UpdateListingRequest:
+      required:
+      - condition
+      - description
+      - price
+      - stockQuantity
+      type: object
+      properties:
+        price:
+          minimum: 0.01
+          exclusiveMinimum: false
+          type: number
+        originalPrice:
+          minimum: 0.01
+          exclusiveMinimum: false
+          type: number
+        stockQuantity:
+          minimum: 0
+          type: integer
+          format: int32
+        condition:
+          type: string
+          enum:
+          - NEW
+          - LIKE_NEW
+          - GOOD
+          - FAIR
+          - DAMAGED
+        description:
+          maxLength: 4000
+          minLength: 0
+          type: string
+        coverImageUrl:
+          maxLength: 500
+          minLength: 0
+          type: string
+        city:
+          maxLength: 120
+          minLength: 0
+          type: string
+        state:
+          maxLength: 2
+          minLength: 2
+          type: string
+    BookResponse:
+      required:
+      - author
+      - categoryId
+      - categoryName
+      - id
+      - title
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        author:
+          type: string
+        publisher:
+          type: string
+        isbn:
+          type: string
+        publicationYear:
+          type: integer
+          format: int32
+        description:
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+        categoryName:
+          type: string
+    ListingResponse:
+      required:
+      - book
+      - condition
+      - createdAt
+      - description
+      - id
+      - price
+      - seller
+      - status
+      - stockQuantity
+      - updatedAt
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        book:
+          $ref: "#/components/schemas/BookResponse"
+        seller:
+          $ref: "#/components/schemas/SellerProfileResponse"
+        price:
+          type: number
+        originalPrice:
+          type: number
+        stockQuantity:
+          type: integer
+          format: int32
+        condition:
+          type: string
+          enum:
+          - NEW
+          - LIKE_NEW
+          - GOOD
+          - FAIR
+          - DAMAGED
+        status:
+          type: string
+          enum:
+          - PENDING_REVIEW
+          - ACTIVE
+          - PAUSED
+          - BLOCKED
+          - SOLD_OUT
+          - REMOVED
+        coverImageUrl:
+          type: string
+        description:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UpdateCartItemRequest:
+      required:
+      - quantity
+      type: object
+      properties:
+        quantity:
+          minimum: 1
+          type: integer
+          format: int32
+    CartItemResponse:
+      required:
+      - id
+      - listing
+      - quantity
+      - subtotal
+      - unitPrice
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        listing:
+          $ref: "#/components/schemas/ListingResponse"
+        quantity:
+          type: integer
+          format: int32
+        unitPrice:
+          type: number
+        subtotal:
+          type: number
+    CartResponse:
+      required:
+      - id
+      - items
+      - itemsCount
+      - subtotalAmount
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItemResponse"
+        subtotalAmount:
+          type: number
+        itemsCount:
+          type: integer
+          format: int32
+    UpdateBookRequest:
+      required:
+      - author
+      - categoryId
+      - title
+      type: object
+      properties:
+        title:
+          maxLength: 255
+          minLength: 0
+          type: string
+        author:
+          maxLength: 255
+          minLength: 0
+          type: string
+        publisher:
+          maxLength: 255
+          minLength: 0
+          type: string
+        isbn:
+          maxLength: 20
+          minLength: 0
+          type: string
+        publicationYear:
+          type: integer
+          format: int32
+        description:
+          maxLength: 4000
+          minLength: 0
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+    UpdateCategoryRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 120
+          minLength: 2
+          type: string
+        description:
+          maxLength: 2000
+          minLength: 0
+          type: string
+        icon:
+          maxLength: 60
+          minLength: 0
+          type: string
+    CategoryResponse:
+      required:
+      - active
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        active:
+          type: boolean
+    CreateSellerRequest:
+      required:
+      - storeName
+      - type
+      type: object
+      properties:
+        storeName:
+          maxLength: 160
+          minLength: 2
+          type: string
+        description:
+          maxLength: 2000
+          minLength: 0
+          type: string
+        type:
+          type: string
+          enum:
+          - INDIVIDUAL
+          - BOOKSTORE
+          - SEBO
+    CreateListingRequest:
+      required:
+      - bookId
+      - condition
+      - description
+      - price
+      - stockQuantity
+      type: object
+      properties:
+        bookId:
+          type: string
+          format: uuid
+        price:
+          minimum: 0.01
+          exclusiveMinimum: false
+          type: number
+        originalPrice:
+          minimum: 0.01
+          exclusiveMinimum: false
+          type: number
+        stockQuantity:
+          minimum: 0
+          type: integer
+          format: int32
+        condition:
+          type: string
+          enum:
+          - NEW
+          - LIKE_NEW
+          - GOOD
+          - FAIR
+          - DAMAGED
+        description:
+          maxLength: 4000
+          minLength: 0
+          type: string
+        coverImageUrl:
+          maxLength: 500
+          minLength: 0
+          type: string
+        city:
+          maxLength: 120
+          minLength: 0
+          type: string
+        state:
+          maxLength: 2
+          minLength: 2
+          type: string
+    CreateReviewRequest:
+      required:
+      - orderId
+      - rating
+      - sellerId
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+        sellerId:
+          type: string
+          format: uuid
+        rating:
+          maximum: 5
+          minimum: 1
+          type: integer
+          format: int32
+        comment:
+          maxLength: 2000
+          minLength: 0
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    ReviewResponse:
+      required:
+      - createdAt
+      - id
+      - orderId
+      - rating
+      - reviewerName
+      - sellerId
+      - tags
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sellerId:
+          type: string
+          format: uuid
+        orderId:
+          type: string
+          format: uuid
+        reviewerName:
+          type: string
+        rating:
+          type: integer
+          format: int32
+        comment:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+    CreateOrderRequest:
+      required:
+      - paymentMethod
+      - shippingAddressId
+      type: object
+      properties:
+        shippingAddressId:
+          type: string
+          format: uuid
+        paymentMethod:
+          type: string
+          enum:
+          - SIMULATED
+    OrderItemResponse:
+      required:
+      - bookTitle
+      - id
+      - listingId
+      - quantity
+      - sellerId
+      - subtotal
+      - unitPrice
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        listingId:
+          type: string
+          format: uuid
+        sellerId:
+          type: string
+          format: uuid
+        bookTitle:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+        unitPrice:
+          type: number
+        subtotal:
+          type: number
+    OrderResponse:
+      required:
+      - buyerId
+      - code
+      - createdAt
+      - id
+      - items
+      - paymentStatus
+      - shippingAmount
+      - status
+      - subtotalAmount
+      - totalAmount
+      - updatedAt
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        buyerId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - CREATED
+          - WAITING_PAYMENT
+          - CONFIRMED
+          - IN_PREPARATION
+          - SHIPPED
+          - DELIVERED
+          - CANCELLED
+          - REFUNDED
+        paymentStatus:
+          type: string
+          enum:
+          - SIMULATED
+          - PENDING
+          - APPROVED
+          - REJECTED
+          - REFUNDED
+          - CANCELLED
+        subtotalAmount:
+          type: number
+        shippingAmount:
+          type: number
+        totalAmount:
+          type: number
+        shippingAddressId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItemResponse"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    FavoriteResponse:
+      required:
+      - createdAt
+      - id
+      - listing
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        listing:
+          $ref: "#/components/schemas/ListingResponse"
+        createdAt:
+          type: string
+          format: date-time
+    AddCartItemRequest:
+      required:
+      - listingId
+      - quantity
+      type: object
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        quantity:
+          minimum: 1
+          type: integer
+          format: int32
+    CreateBookRequest:
+      required:
+      - author
+      - categoryId
+      - title
+      type: object
+      properties:
+        title:
+          maxLength: 255
+          minLength: 0
+          type: string
+        author:
+          maxLength: 255
+          minLength: 0
+          type: string
+        publisher:
+          maxLength: 255
+          minLength: 0
+          type: string
+        isbn:
+          maxLength: 20
+          minLength: 0
+          type: string
+        publicationYear:
+          type: integer
+          format: int32
+        description:
+          maxLength: 4000
+          minLength: 0
+          type: string
+        categoryId:
+          type: string
+          format: uuid
+    RegisterRequest:
+      required:
+      - email
+      - name
+      - password
+      type: object
+      properties:
+        name:
+          maxLength: 120
+          minLength: 2
+          type: string
+        email:
+          maxLength: 160
+          minLength: 0
+          type: string
+        password:
+          maxLength: 100
+          minLength: 8
+          pattern: "^(?=.*[A-Za-z])(?=.*\\d).+$"
+          type: string
+        phone:
+          maxLength: 20
+          minLength: 0
+          type: string
+    AuthResponse:
+      required:
+      - accessToken
+      - expiresInSeconds
+      - refreshToken
+      - user
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresInSeconds:
+          type: integer
+          format: int64
+        user:
+          $ref: "#/components/schemas/UserResponse"
+    RefreshTokenRequest:
+      required:
+      - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    LoginRequest:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    CreateCategoryRequest:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          maxLength: 120
+          minLength: 2
+          type: string
+        description:
+          maxLength: 2000
+          minLength: 0
+          type: string
+        icon:
+          maxLength: 60
+          minLength: 0
+          type: string
+    UpdateOrderStatusRequest:
+      required:
+      - status
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - CREATED
+          - WAITING_PAYMENT
+          - CONFIRMED
+          - IN_PREPARATION
+          - SHIPPED
+          - DELIVERED
+          - CANCELLED
+          - REFUNDED
+    CancelOrderRequest:
+      type: object
+      properties:
+        reason:
+          maxLength: 500
+          minLength: 0
+          type: string
+    AdminUserResponse:
+      required:
+      - createdAt
+      - email
+      - id
+      - name
+      - roles
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - BLOCKED
+          - PENDING_VERIFICATION
+          - DELETED
+        roles:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - CUSTOMER
+            - SELLER
+            - ADMIN
+            - SUPPORT
+        createdAt:
+          type: string
+          format: date-time
+    BlockUserRequest:
+      type: object
+      properties:
+        reason:
+          maxLength: 500
+          minLength: 0
+          type: string
+    ModerateListingRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+    SellerReputationResponse:
+      required:
+      - averageRating
+      - sellerId
+      - totalReviews
+      type: object
+      properties:
+        sellerId:
+          type: string
+          format: uuid
+        averageRating:
+          type: number
+        totalReviews:
+          type: integer
+          format: int64
+    SellerDashboardResponse:
+      required:
+      - activeListings
+      - averageRating
+      - ordersOpen
+      - pendingListings
+      - revenueLast30Days
+      - salesLast30Days
+      - soldOutListings
+      type: object
+      properties:
+        activeListings:
+          type: integer
+          format: int64
+        pendingListings:
+          type: integer
+          format: int64
+        soldOutListings:
+          type: integer
+          format: int64
+        ordersOpen:
+          type: integer
+          format: int64
+        salesLast30Days:
+          type: integer
+          format: int64
+        revenueLast30Days:
+          type: number
+        averageRating:
+          type: number
+    PagedResponseOrderResponse:
+      required:
+      - items
+      - pagination
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationResponse"
+    PaginationResponse:
+      required:
+      - page
+      - size
+      - total
+      - totalPages
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+    PagedResponseListingResponse:
+      required:
+      - items
+      - pagination
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ListingResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationResponse"
+    PagedResponseBookResponse:
+      required:
+      - items
+      - pagination
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/BookResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationResponse"
+    PagedResponseAdminUserResponse:
+      required:
+      - items
+      - pagination
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminUserResponse"
+        pagination:
+          $ref: "#/components/schemas/PaginationResponse"
+    AdminDashboardResponse:
+      required:
+      - activeListingsCount
+      - gmvLast30Days
+      - ordersTodayCount
+      - pendingListingsCount
+      - sellersCount
+      - usersCount
+      type: object
+      properties:
+        usersCount:
+          type: integer
+          format: int64
+        sellersCount:
+          type: integer
+          format: int64
+        activeListingsCount:
+          type: integer
+          format: int64
+        pendingListingsCount:
+          type: integer
+          format: int64
+        ordersTodayCount:
+          type: integer
+          format: int64
+        gmvLast30Days:
+          type: number
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
-  parameters:
-    IdPath:
-      in: path
-      name: id
-      required: true
-      schema: { type: string, format: uuid }
-    PageQuery:
-      in: query
-      name: page
-      schema: { type: integer, default: 0, minimum: 0 }
-    SizeQuery:
-      in: query
-      name: size
-      schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
-
-  responses:
-    Unauthorized:
-      description: Não autenticado
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/Error' }
-    NotFound:
-      description: Recurso não encontrado
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/Error' }
-    Conflict:
-      description: Conflito (ex: e-mail duplicado)
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/Error' }
-    ValidationError:
-      description: Erro de validação de campos
-      content:
-        application/json:
-          schema: { $ref: '#/components/schemas/Error' }
-
-  schemas:
-    UserStatus:
-      type: string
-      enum: [ACTIVE, BLOCKED, PENDING_VERIFICATION, DELETED]
-    Role:
-      type: string
-      enum: [CUSTOMER, SELLER, ADMIN, SUPPORT]
-    SellerType:
-      type: string
-      enum: [INDIVIDUAL, BOOKSTORE, SEBO]
-    SellerStatus:
-      type: string
-      enum: [ACTIVE, SUSPENDED, PENDING_REVIEW]
-    BookCondition:
-      type: string
-      enum: [NEW, LIKE_NEW, GOOD, FAIR, DAMAGED]
-    ListingStatus:
-      type: string
-      enum: [PENDING_REVIEW, ACTIVE, PAUSED, BLOCKED, SOLD_OUT, REMOVED]
-    OrderStatus:
-      type: string
-      enum:
-        [CREATED, WAITING_PAYMENT, CONFIRMED, IN_PREPARATION, SHIPPED, DELIVERED, CANCELLED, REFUNDED]
-    PaymentStatus:
-      type: string
-      enum: [SIMULATED, PENDING, APPROVED, REJECTED, REFUNDED, CANCELLED]
-
-    Money:
-      type: string
-      pattern: '^\d+\.\d{2}$'
-      example: "34.90"
-
-    Error:
-      type: object
-      required: [code, message, timestamp]
-      properties:
-        code: { type: string, example: VALIDATION_ERROR }
-        message: { type: string, example: "Campo email é obrigatório" }
-        timestamp: { type: string, format: date-time }
-        path: { type: string, example: /api/auth/register }
-        details:
-          type: array
-          items:
-            type: object
-            properties:
-              field: { type: string }
-              issue: { type: string }
-
-    Pagination:
-      type: object
-      required: [page, size, total]
-      properties:
-        page: { type: integer }
-        size: { type: integer }
-        total: { type: integer }
-
-    RegisterRequest:
-      type: object
-      required: [name, email, password]
-      properties:
-        name: { type: string, minLength: 2, maxLength: 120 }
-        email: { type: string, format: email }
-        password: { type: string, minLength: 8 }
-        phone: { type: string, nullable: true }
-
-    LoginRequest:
-      type: object
-      required: [email, password]
-      properties:
-        email: { type: string, format: email }
-        password: { type: string }
-
-    AuthResponse:
-      type: object
-      properties:
-        token: { type: string }
-        refreshToken: { type: string }
-        expiresInSeconds: { type: integer }
-        user: { $ref: '#/components/schemas/User' }
-
-    UpdateUserRequest:
-      type: object
-      properties:
-        name: { type: string }
-        phone: { type: string, nullable: true }
-
-    User:
-      type: object
-      required: [id, name, email, status, roles, createdAt]
-      properties:
-        id: { type: string, format: uuid }
-        name: { type: string }
-        email: { type: string, format: email }
-        phone: { type: string, nullable: true }
-        status: { $ref: '#/components/schemas/UserStatus' }
-        roles:
-          type: array
-          items: { $ref: '#/components/schemas/Role' }
-        createdAt: { type: string, format: date-time }
-
-    AddressRequest:
-      type: object
-      required: [label, recipient, street, number, neighborhood, city, state, postalCode]
-      properties:
-        label: { type: string }
-        recipient: { type: string }
-        street: { type: string }
-        number: { type: string }
-        complement: { type: string, nullable: true }
-        neighborhood: { type: string }
-        city: { type: string }
-        state: { type: string, minLength: 2, maxLength: 2 }
-        postalCode: { type: string }
-        isDefault: { type: boolean, default: false }
-
-    Address:
-      allOf:
-        - $ref: '#/components/schemas/AddressRequest'
-        - type: object
-          properties:
-            id: { type: string, format: uuid }
-            createdAt: { type: string, format: date-time }
-
-    CreateSellerRequest:
-      type: object
-      required: [storeName, type]
-      properties:
-        storeName: { type: string }
-        description: { type: string, nullable: true }
-        type: { $ref: '#/components/schemas/SellerType' }
-
-    SellerProfile:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        userId: { type: string, format: uuid }
-        storeName: { type: string }
-        description: { type: string, nullable: true }
-        type: { $ref: '#/components/schemas/SellerType' }
-        rating: { type: number, format: float, example: 4.7 }
-        activeListingsCount: { type: integer, example: 23 }
-        status: { $ref: '#/components/schemas/SellerStatus' }
-
-    Category:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        name: { type: string }
-        icon: { type: string, example: "book" }
-        booksCount: { type: integer, example: 142 }
-        active: { type: boolean }
-
-    Book:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        title: { type: string }
-        author: { type: string }
-        publisher: { type: string, nullable: true }
-        isbn: { type: string, nullable: true }
-        publicationYear: { type: integer, nullable: true }
-        description: { type: string, nullable: true }
-        categoryId: { type: string, format: uuid }
-
-    PagedBook:
-      type: object
-      properties:
-        items:
-          type: array
-          items: { $ref: '#/components/schemas/Book' }
-        pagination: { $ref: '#/components/schemas/Pagination' }
-
-    CreateListingRequest:
-      type: object
-      required: [bookId, price, stockQuantity, condition, description]
-      properties:
-        bookId: { type: string, format: uuid }
-        price: { $ref: '#/components/schemas/Money' }
-        originalPrice: { $ref: '#/components/schemas/Money' }
-        stockQuantity: { type: integer, minimum: 0 }
-        condition: { $ref: '#/components/schemas/BookCondition' }
-        description: { type: string }
-        coverImageUrl: { type: string, nullable: true }
-        city: { type: string, nullable: true }
-        state: { type: string, nullable: true }
-
-    BookListing:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        book: { $ref: '#/components/schemas/Book' }
-        seller: { $ref: '#/components/schemas/SellerProfile' }
-        price: { $ref: '#/components/schemas/Money' }
-        originalPrice: { $ref: '#/components/schemas/Money' }
-        stockQuantity: { type: integer }
-        condition: { $ref: '#/components/schemas/BookCondition' }
-        status: { $ref: '#/components/schemas/ListingStatus' }
-        coverImageUrl: { type: string, nullable: true }
-        description: { type: string }
-        city: { type: string, nullable: true }
-        state: { type: string, nullable: true }
-        tags:
-          type: array
-          items: { type: string }
-        discountPercentage: { type: integer, nullable: true, example: 35 }
-        isFavorite: { type: boolean }
-
-    PagedListing:
-      type: object
-      properties:
-        items:
-          type: array
-          items: { $ref: '#/components/schemas/BookListing' }
-        pagination: { $ref: '#/components/schemas/Pagination' }
-
-    AddCartItemRequest:
-      type: object
-      required: [listingId, quantity]
-      properties:
-        listingId: { type: string, format: uuid }
-        quantity: { type: integer, minimum: 1 }
-
-    CartItem:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        listing: { $ref: '#/components/schemas/BookListing' }
-        quantity: { type: integer }
-        unitPrice: { $ref: '#/components/schemas/Money' }
-
-    Cart:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        items:
-          type: array
-          items: { $ref: '#/components/schemas/CartItem' }
-        subtotalAmount: { $ref: '#/components/schemas/Money' }
-
-    CreateOrderRequest:
-      type: object
-      required: [shippingAddressId]
-      properties:
-        shippingAddressId: { type: string, format: uuid }
-
-    OrderItem:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        listingId: { type: string, format: uuid }
-        sellerId: { type: string, format: uuid }
-        bookTitle: { type: string }
-        quantity: { type: integer }
-        unitPrice: { $ref: '#/components/schemas/Money' }
-        subtotal: { $ref: '#/components/schemas/Money' }
-
-    Order:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        code: { type: string, example: "CZ-2025-000123" }
-        buyerId: { type: string, format: uuid }
-        items:
-          type: array
-          items: { $ref: '#/components/schemas/OrderItem' }
-        status: { $ref: '#/components/schemas/OrderStatus' }
-        paymentStatus: { $ref: '#/components/schemas/PaymentStatus' }
-        subtotalAmount: { $ref: '#/components/schemas/Money' }
-        shippingAmount: { $ref: '#/components/schemas/Money' }
-        totalAmount: { $ref: '#/components/schemas/Money' }
-        createdAt: { type: string, format: date-time }
-
-    PagedOrder:
-      type: object
-      properties:
-        items:
-          type: array
-          items: { $ref: '#/components/schemas/Order' }
-        pagination: { $ref: '#/components/schemas/Pagination' }
-
-    CreateReviewRequest:
-      type: object
-      required: [orderId, sellerId, rating]
-      properties:
-        orderId: { type: string, format: uuid }
-        sellerId: { type: string, format: uuid }
-        rating: { type: integer, minimum: 1, maximum: 5 }
-        comment: { type: string, nullable: true }
-        tags: { type: string, nullable: true }
-
-    Review:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        sellerId: { type: string, format: uuid }
-        reviewerName: { type: string }
-        rating: { type: integer }
-        comment: { type: string, nullable: true }
-        tags: { type: string, nullable: true }
-        createdAt: { type: string, format: date-time }
-
-    AdminDashboard:
-      type: object
-      properties:
-        usersCount: { type: integer }
-        sellersCount: { type: integer }
-        listingsPendingCount: { type: integer }
-        ordersTodayCount: { type: integer }
-        revenueLast30Days: { $ref: '#/components/schemas/Money' }

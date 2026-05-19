@@ -19,7 +19,11 @@
     "api:build": "cd apps/api && ./gradlew build",
     "api:test": "cd apps/api && ./gradlew test",
     "infra:up": "docker compose -f infra/docker-compose.yml up -d",
-    "infra:down": "docker compose -f infra/docker-compose.yml down"
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "stack:up": "docker compose -f infra/docker-compose.yml --profile full up -d --build",
+    "stack:down": "docker compose -f infra/docker-compose.yml --profile full down",
+    "stack:logs": "docker compose -f infra/docker-compose.yml --profile full logs -f api",
+    "stack:smoke": "python infra/smoke-test.py"
   },
   "engines": {
     "node": ">=20",

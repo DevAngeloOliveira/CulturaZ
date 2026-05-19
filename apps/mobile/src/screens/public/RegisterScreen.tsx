@@ -22,18 +22,22 @@ interface RegisterScreenProps {
 }
 
 export const RegisterScreen = ({ onBack }: RegisterScreenProps) => {
-  const login = useAuthStore((s) => s.login);
+  const register = useAuthStore((s) => s.register);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isValid = name.length >= 2 && email.includes('@') && password.length >= 8;
 
   const handleSubmit = async () => {
+    setError(null);
     setLoading(true);
     try {
-      await login(email, password);
+      await register({ name: name.trim(), email: email.trim(), password });
+    } catch {
+      setError('Não foi possível criar a conta. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -80,6 +84,7 @@ export const RegisterScreen = ({ onBack }: RegisterScreenProps) => {
               onChangeText={setPassword}
               leftIcon="lock-closed-outline"
               helper="Inclua letras e números para mais segurança."
+              error={error ?? undefined}
             />
           </View>
 
