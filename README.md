@@ -47,19 +47,21 @@ Desenvolvido em contexto acadêmico mas **modelado como produto real**: separaç
 
 ## Status do projeto
 
-O ciclo de implementação foi entregue em **8 sprints**, todas concluídas. App e API estão integrados ponta a ponta — typecheck e lint zerados, dependências alinhadas via `expo install --check`.
+App e API estão integrados ponta a ponta — typecheck e lint zerados, dependências alinhadas via `expo install --check`. O desenvolvimento passou por seis fases:
 
-| Sprint                                       | Status |
-| -------------------------------------------- | ------ |
-| 0 — Desbloquear boot (sem dep nativa extra)  | ✅      |
-| 1 — Home consumindo API real                 | ✅      |
-| 2 — Catálogo, Filtros, Detalhes, Favoritos   | ✅      |
-| 3 — Carrinho e Checkout                      | ✅      |
-| 4 — Pedidos e Avaliações                     | ✅      |
-| 5 — Perfil e Endereços                       | ✅      |
-| 6 — Fluxo Vendedor                           | ✅      |
-| 7 — Fluxo Admin                              | ✅      |
-| 8 — Hardening (toasts, lint, mocks removidos)| ✅      |
+| Fase | Entrega | Status |
+| --- | --- | --- |
+| 1 — Modelagem e contratos | Domínio, modelo lógico (13 tabelas), OpenAPI 3.1 com os 53 endpoints como fonte de verdade | ✅ |
+| 2 — Backend | Spring Boot + Kotlin, 12 domínios modulares, JWT HS512 + refresh, RBAC, Flyway V001…V013 | ✅ |
+| 3 — Infra local | Docker Compose (API + PostgreSQL 16), perfis `default`/`full`, smoke test E2E em Python | ✅ |
+| 4 — Camada de integração mobile | Tipos gerados via `openapi-typescript`, http client (Bearer + refresh single-flight + timeout 15s), 11 services tipados, sessão em `expo-secure-store`, auth store em Zustand | ✅ |
+| 5 — Design System v0.1 | Figma → tokens (mint `#DDEBE4`, `radius.md=17`), Fraunces + Inter, ~50 componentes reutilizáveis | ✅ |
+| 6 — App mobile (8 sprints) | Telas de comprador, vendedor e admin ligadas à API real (ver detalhamento abaixo) | ✅ |
+| 7 — CI/CD | GitHub Actions: `ci-mobile.yml` (typecheck + lint) e `ci-api.yml` (build + testes) | ✅ |
+
+Detalhamento da Fase 6 — sprints do mobile, em ordem de entrega:
+
+`0` boot sem dep nativa extra · `1` Home com API real · `2` catálogo, filtros, detalhes, favoritos · `3` carrinho e checkout · `4` pedidos e avaliações · `5` perfil e endereços · `6` fluxo vendedor · `7` fluxo admin · `8` hardening (toasts, lint, remoção de mocks).
 
 Métricas do mobile:
 
