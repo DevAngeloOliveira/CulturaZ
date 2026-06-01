@@ -73,47 +73,13 @@ Métricas do mobile:
 
 ## Funcionalidades por perfil
 
-### 🛒 Comprador (CUSTOMER)
+**Comprador (CUSTOMER)** — auth completa (Splash/Onboarding/Login/Registro) com sessão em `expo-secure-store` e refresh em 401; Home com categorias, ofertas-relâmpago, recomendados, vendedor em destaque e último pedido em andamento; catálogo com busca debounced (350ms), paginação infinita e modal de filtros (categoria, condição, faixa de preço, cidade/UF); detalhes do livro com favoritar, carrinho e card do vendedor; carrinho com stepper respeitando `stockQuantity`; checkout selecionando endereço (com fallback inline), confirmando `paymentMethod=SIMULATED`; pedidos em abas com timeline visual `CREATED → CONFIRMED → IN_PREPARATION → SHIPPED → DELIVERED`, cancelamento condicional e avaliação pós-`DELIVERED` (5 estrelas, tags, comentário de 500 chars); perfil com edição de nome/telefone e CRUD de endereços.
 
-- **Onboarding e auth** — Splash, onboarding com chips de interesse, login, registro com validação client-side; sessão persistente via `expo-secure-store` e refresh automático em 401.
-- **Marketplace Home** — categorias, ofertas-relâmpago (calculadas via `discountPercent`), recomendados, vendedor em destaque, último pedido em andamento; pull-to-refresh invalida todas as queries em paralelo; estados granulares de Loading/Error/Empty por seção.
-- **Catálogo** — busca debounced (350ms), `FlatList` vertical com paginação infinita via `useInfiniteQuery`, modal de filtros (categoria, condição, faixa de preço, cidade/UF), contador de resultados e botão "Limpar filtros".
-- **Detalhes do livro** — capa, título Fraunces, autor, eyebrow de categoria, preço com desconto calculado, badge de condição, estoque, descrição, card do vendedor (tipo + rating), botões "Favoritar" (toggle real) e "Adicionar ao carrinho" com feedback via Toast.
-- **Favoritos** — lista persistida no backend, tap navega para detalhes.
-- **Carrinho** — stepper de quantidade respeitando `stockQuantity`, lixeira por item, subtotal vindo do backend, CTA "Finalizar pedido".
-- **Checkout** — seleção de endereço cadastrado (padrão pré-selecionado) com **fallback inline** quando o usuário não tem endereço, resumo (subtotal + frete simulado R$ 0,00 + total), nota de "pagamento simulado", confirmação `paymentMethod=SIMULATED` e navegação direta para os detalhes do pedido criado.
-- **Pedidos** — abas Todos / Em andamento / Entregues; detalhes com **timeline visual** (`CREATED → CONFIRMED → IN_PREPARATION → SHIPPED → DELIVERED`) pintada por status; cancelamento condicionado a status canceláveis; quando `DELIVERED`, CTA para avaliar.
-- **Avaliação** — input customizado de 5 estrelas, chips de tags sugeridas, textarea com contador 500 chars.
-- **Perfil** — avatar com iniciais, edição de nome/telefone (e-mail readonly), gerenciamento de endereços (CRUD + definir padrão), logout.
+**Vendedor (SELLER)** — ativação por form de loja (`storeName`, descrição, tipo INDIVIDUAL/BOOKSTORE/SEBO) com `forceRefreshSession()` reemitindo o JWT já com a role nova; painel com 6 MetricCards (ativos, pendentes, esgotados, pedidos abertos, vendas 30d, receita 30d); CRUD de anúncios com badge de status, ações Pausar/Reativar/Remover e criação que faz busca debounced de livro existente *ou* cadastro inline de livro novo; pedidos recebidos com CTA dinâmica de transição de status; relatórios com barras horizontais custom (zero dep nova); página de reputação com média e lista de reviews.
 
-### 🏪 Vendedor (SELLER)
+**Admin** — painel com 6 MetricCards globais (usuários, vendedores, ativos, em moderação, pedidos hoje, GMV 30d); gestão de usuários com filtros por status e bloqueio/desbloqueio com motivo; moderação de anúncios em `PENDING_REVIEW` (aprovar/bloquear invalida cascata de `queryKeys.listings.all`); CRUD de categorias via modal; auditoria de pedidos com payment status; relatórios visuais.
 
-- **Ativação** — form de loja (`storeName`, descrição, tipo INDIVIDUAL/BOOKSTORE/SEBO); após `POST /api/sellers`, o app força refresh do JWT para a nova role entrar no token antes da próxima chamada autenticada (caso clássico de role-add em runtime).
-- **Painel** — 6 MetricCards (Anúncios ativos, Pendentes, Esgotados, Pedidos abertos, Vendas 30 dias, Receita 30 dias), atalho para reputação, botão de swap para o modo comprador.
-- **Anúncios** — `FlatList` de listings com badge de status (Em análise/Ativo/Pausado/Bloqueado/Esgotado), ações condicionais Pausar/Reativar/Remover; FAB `+` abre criação.
-- **Criar anúncio** — busca debounced de livro existente (`booksApi.search`) ou cadastro inline de livro novo (`POST /api/books`) com chips de categoria; depois preenche preço, preço original, estoque, condição (chips), descrição, URL da capa e localização. Submit cria o listing em `PENDING_REVIEW`.
-- **Pedidos recebidos** — lista + detalhe; CTA dinâmica "Mover para 'CONFIRMED' / 'IN_PREPARATION' / 'SHIPPED' / 'DELIVERED'" baseada na transição válida atual; status terminais mostram "Sem mais transições".
-- **Relatórios** — métricas + **barras horizontais proporcionais custom** (zero dep nova) para split de anúncios por status e pedidos abertos vs concluídos.
-- **Reputação** — média + total de reviews + lista de avaliações.
-
-### 🛡️ Admin
-
-- **Painel** — 6 MetricCards globais (Usuários, Vendedores, Anúncios ativos, Em moderação, Pedidos hoje, GMV 30 dias), atalho para auditoria de pedidos, swap para modo comprador.
-- **Usuários** — filtros por status (Todos/Ativos/Bloqueados/Pendentes), bloqueio com motivo e desbloqueio.
-- **Moderação** — filtros Pendentes/Ativos/Bloqueados/Todos; aprovar anúncios faz eles entrarem no catálogo público imediatamente (invalidação cascateada de `queryKeys.listings.all`).
-- **Categorias** — CRUD via modal bottom sheet (nome, descrição, ícone Ionicon) + ativar/desativar.
-- **Auditoria de pedidos** — lista geral + detalhe com IDs de comprador/vendedor, payment status.
-- **Relatórios** — GMV 30 dias, pedidos hoje, split visual de anúncios, card de comunidade.
-
-### 🔀 Navegação por role
-
-O `RootNavigator` escolhe a árvore de telas baseada em `useAuthStore.activeRole`, com prioridade `ADMIN > SUPPORT > SELLER > CUSTOMER`. Isso garante que:
-
-- Admin loga e cai direto em `AdminTabs`.
-- Vendedor loga e cai em `SellerTabs`.
-- Comprador puro loga e cai em `BuyerTabs`.
-
-Os dashboards de admin e seller têm um botão de **swap** que permite voltar para o modo comprador (`switchRole('CUSTOMER')`) sem logout.
+**Roteamento por role** — `RootNavigator` escolhe a árvore baseada em `useAuthStore.activeRole`, com prioridade `ADMIN > SUPPORT > SELLER > CUSTOMER`. Admin cai direto em `AdminTabs`, vendedor em `SellerTabs`, comprador em `BuyerTabs`. Dashboards de admin/seller têm um botão de swap pra voltar ao modo comprador sem logout.
 
 ---
 
@@ -225,60 +191,14 @@ RootNavigator
 ```
 CulturaZ/
 ├── apps/
-│   ├── mobile/                          # React Native + Expo
-│   │   ├── App.tsx
-│   │   ├── src/
-│   │   │   ├── app/
-│   │   │   │   ├── navigation/          # Root + stacks por tab
-│   │   │   │   └── providers/           # Query, Theme, Font
-│   │   │   ├── components/              # ~50 componentes reutilizáveis
-│   │   │   │   ├── buttons/ cards/ feedback/ forms/ layout/ marketplace/
-│   │   │   ├── screens/
-│   │   │   │   ├── public/  buyer/  seller/  admin/
-│   │   │   ├── services/
-│   │   │   │   ├── api/                 # 12 services tipados por domínio
-│   │   │   │   ├── http.ts              # Bearer + refresh single-flight
-│   │   │   │   └── session.ts           # expo-secure-store
-│   │   │   ├── stores/                  # auth, catalog
-│   │   │   ├── hooks/
-│   │   │   │   └── api/                 # 30 hooks (TanStack Query)
-│   │   │   ├── theme/                   # colors, radius, spacing, typography
-│   │   │   ├── types/
-│   │   │   │   ├── api.generated.ts     # gerado de openapi.yaml
-│   │   │   │   └── api.ts               # re-exports tipados
-│   │   │   └── utils/                   # adapters, format, apiErrors
-│   │   ├── metro.config.js
-│   │   └── package.json
-│   │
-│   └── api/                             # Spring Boot 3.3 · Kotlin
-│       ├── src/main/kotlin/com/culturaz/api/
-│       │   ├── auth/ users/ sellers/ books/ categories/
-│       │   ├── listings/ favorites/ cart/ orders/ reviews/
-│       │   ├── admin/ shared/ config/
-│       ├── src/main/resources/
-│       │   ├── application.yml
-│       │   └── db/migration/            # V001…V013 (Flyway)
-│       ├── build.gradle.kts
-│       └── Dockerfile
-│
-├── packages/
-│   └── contracts/
-│       ├── openapi.yaml                 # fonte de verdade (53 endpoints)
-│       └── domain.md
-│
-├── docs/                                # ver "Documentação adicional"
-│
-├── infra/
-│   ├── docker-compose.yml               # PostgreSQL + API (perfis: default, full)
-│   ├── smoke-test.py                    # smoke E2E em Python
-│   └── postgres/init/
-│
-├── .github/workflows/
-│   ├── ci-mobile.yml                    # typecheck + lint do mobile
-│   └── ci-api.yml                       # build + testes da API
-│
+│   ├── mobile/              React Native + Expo (App.tsx, src/{app,components,screens,services,stores,hooks,theme,types,utils})
+│   └── api/                 Spring Boot 3.3 · Kotlin (src/main/kotlin/com/culturaz/api/{auth,users,sellers,books,categories,listings,favorites,cart,orders,reviews,admin,shared,config} + db/migration V001…V013)
+├── packages/contracts/      openapi.yaml (53 endpoints) + domain.md
+├── docs/                    ver "Documentação adicional"
+├── infra/                   docker-compose.yml, smoke-test.py, postgres/init/
+├── .github/workflows/       ci-mobile.yml + ci-api.yml
 ├── pnpm-workspace.yaml
-├── package.json                         # scripts root agregadores
+├── package.json             scripts root agregadores
 └── README.md
 ```
 
@@ -354,15 +274,15 @@ pnpm stack:smoke                  # smoke test E2E (Python)
 
 ## Credenciais de desenvolvimento
 
-O Flyway popula três usuários de seed via `V013__seed_local_admin_user.sql`:
+O Flyway popula três usuários de seed (hashes bcrypt no script [V013](apps/api/src/main/resources/db/migration/V013__seed_local_admin_user.sql)):
 
-| Perfil    | E-mail                    | Senha           | Roles            |
-| --------- | ------------------------- | --------------- | ---------------- |
-| Admin     | `admin@culturaz.local`    | `Admin123456`   | ADMIN, CUSTOMER  |
-| Comprador | `buyer@culturaz.local`    | `Buyer123456`   | CUSTOMER         |
-| Vendedor  | `seller@culturaz.local`   | `Seller123456`  | SELLER, CUSTOMER |
+| Perfil    | E-mail                    | Roles            |
+| --------- | ------------------------- | ---------------- |
+| Admin     | `admin@culturaz.local`    | ADMIN, CUSTOMER  |
+| Comprador | `buyer@culturaz.local`    | CUSTOMER         |
+| Vendedor  | `seller@culturaz.local`   | SELLER, CUSTOMER |
 
-> ⚠️ **Não usar em produção.** Os hashes vão para o Git para deixar o setup local plug-and-play; em ambientes reais, seeds com credenciais reais devem vir de um vault.
+As senhas de login local são usadas pelo script [infra/smoke-test.py](infra/smoke-test.py) — abra esse arquivo para copiá-las. **Apenas para ambiente local**; em produção, seeds com credenciais reais devem vir de um vault.
 
 ---
 
@@ -401,18 +321,7 @@ Contrato OpenAPI (53 endpoints): [packages/contracts/openapi.yaml](packages/cont
 
 ## Roadmap futuro
 
-Fora do escopo atual, mas previsto:
-
-| Feature                        | Status   | Notas                                                                      |
-| ------------------------------ | -------- | -------------------------------------------------------------------------- |
-| Pagamento real (Stripe/MP)     | 🟡 Plan  | Hoje `paymentMethod=SIMULATED`. Backend já modela `paymentStatus`.         |
-| Frete com Correios/Melhor Envio| 🟡 Plan  | Hoje `shippingAmount=0`. Modelo de endereço já suporta.                    |
-| Chat comprador↔vendedor        | 🟡 Plan  | UI hoje mostra "em breve" no BookDetails.                                  |
-| Upload de imagens (S3/similar) | 🟡 Plan  | Atualmente `coverImageUrl` é string externa (ex.: openlibrary.org).        |
-| Push notifications             | 🟡 Plan  | Expo Push está acessível pelo SDK 51, falta o backend disparar.            |
-| i18n e dark mode               | 🟡 Plan  | Theme tokens já existem; falta provider de tema e dicionários.             |
-| Validação de forms com Zod     | 🟠 Avaliar| Validação manual está OK hoje; ROI baixo até forms complexos chegarem.    |
-| Editoras / campanhas / pré-venda | 🔴 Backlog | Não modelado no backend; só entra se virar requisito.                    |
+Fora do escopo atual, mas previstos: pagamento real (Stripe/MP — hoje `SIMULATED`), frete com Correios/Melhor Envio (hoje `shippingAmount=0`), chat comprador↔vendedor (UI mostra "em breve"), upload de imagens em S3 (hoje `coverImageUrl` é string externa), push notifications via Expo Push, i18n + dark mode (tokens prontos, faltam provider e dicionários), validação de forms com Zod (avaliar conforme forms ficarem complexos). Fora do backlog ativo: editoras, campanhas e pré-vendas — entram só se virarem requisito.
 
 ---
 
