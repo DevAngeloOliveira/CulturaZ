@@ -2,6 +2,8 @@ import { clearSession, getAccessToken, getRefreshToken, saveSession } from './se
 
 const baseUrl = (process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080').replace(/\/$/, '');
 
+const DEFAULT_TIMEOUT_MS = 15000;
+
 export interface ApiErrorBody {
   code: string;
   message: string;
@@ -70,6 +72,8 @@ const refreshOnce = (): Promise<boolean> => {
   return refreshInFlight;
 };
 
+export const forceRefreshSession = (): Promise<boolean> => refreshOnce();
+
 const buildUrl = (path: string, query?: RequestOptions['query']): string => {
   if (!query) return `${baseUrl}${path}`;
   const params = new URLSearchParams();
@@ -119,30 +123,42 @@ export const request = async <T>(
 ): Promise<T> => {
   const useAuth = options.auth !== false;
 
-  let response = await execute(method, path, options, useAuth);
-
-  if (response.status === 401 && useAuth && getRefreshToken()) {
-    const refreshed = await refreshOnce();
-    if (refreshed) {
-      response = await execute(method, path, options, true);
-    }
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let effectiveOptions = options;
+  if (!options.signal) {
+    const controller = new AbortController();
+    timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+    effectiveOptions = { ...options, signal: controller.signal };
   }
 
-  const payload = await parseBody(response);
+  try {
+    let response = await execute(method, path, effectiveOptions, useAuth);
 
-  if (!response.ok) {
-    if (response.status === 401 && useAuth) {
-      await clearSession();
-      onUnauthorized?.();
+    if (response.status === 401 && useAuth && getRefreshToken()) {
+      const refreshed = await refreshOnce();
+      if (refreshed) {
+        response = await execute(method, path, effectiveOptions, true);
+      }
     }
-    throw new ApiError(
-      response.status,
-      payload as Partial<ApiErrorBody> | undefined,
-      `Falha na requisição (${response.status}).`,
-    );
-  }
 
-  return payload as T;
+    const payload = await parseBody(response);
+
+    if (!response.ok) {
+      if (response.status === 401 && useAuth) {
+        await clearSession();
+        onUnauthorized?.();
+      }
+      throw new ApiError(
+        response.status,
+        payload as Partial<ApiErrorBody> | undefined,
+        `Falha na requisição (${response.status}).`,
+      );
+    }
+
+    return payload as T;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
 };
 
 export const httpClient = {

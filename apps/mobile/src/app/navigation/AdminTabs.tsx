@@ -3,12 +3,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { bottomTabScreenOptions, tabIcon } from '@/components/layout/BottomTabBar';
 import {
   AdminCategoriesScreen,
-  AdminDashboardScreen,
   AdminModerationScreen,
   AdminReportsScreen,
   AdminUsersScreen,
 } from '@/screens/admin';
 
+import { AdminDashboardStack } from './AdminDashboardStack';
 import type { AdminTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<AdminTabParamList>();
@@ -17,7 +17,7 @@ export const AdminTabs = () => (
   <Tab.Navigator screenOptions={bottomTabScreenOptions}>
     <Tab.Screen
       name="DashboardTab"
-      component={AdminDashboardScreen}
+      component={AdminDashboardStack}
       options={{ tabBarLabel: 'Painel', tabBarIcon: tabIcon('grid') }}
     />
     <Tab.Screen

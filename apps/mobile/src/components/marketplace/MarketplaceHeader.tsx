@@ -10,6 +10,7 @@ interface MarketplaceHeaderProps {
   cartCount?: number;
   favoritesCount?: number;
   city?: string;
+  tagline?: string;
   onSearchPress?: () => void;
   onCartPress?: () => void;
   onFavoritesPress?: () => void;
@@ -19,6 +20,7 @@ export const MarketplaceHeader = ({
   cartCount = 0,
   favoritesCount = 0,
   city = 'São Paulo, SP',
+  tagline = 'Marketplace literário',
   onCartPress,
   onFavoritesPress,
 }: MarketplaceHeaderProps) => (
@@ -31,7 +33,7 @@ export const MarketplaceHeader = ({
           </View>
           <View>
             <Text style={styles.brand}>CulturaZ</Text>
-            <Text style={styles.tagline}>Marketplace literário</Text>
+            <Text style={styles.tagline} numberOfLines={1}>{tagline}</Text>
           </View>
         </View>
         <View style={styles.actions}>

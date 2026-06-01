@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -10,9 +11,9 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors, radius, spacing, touchTarget, typography } from '@/theme';
+import { colors, radius, spacing, typography } from '@/theme';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'accent';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'accent';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends Omit<PressableProps, 'style'> {
@@ -28,18 +29,24 @@ interface ButtonProps extends Omit<PressableProps, 'style'> {
 
 const VARIANT_STYLES: Record<
   ButtonVariant,
-  { bg: string; fg: string; border?: string }
+  { bg: string; fg: string; border?: string; elevated?: boolean }
 > = {
-  primary: { bg: colors.primary, fg: colors.white },
-  secondary: { bg: colors.surface, fg: colors.primary, border: colors.primary },
+  primary: { bg: colors.primary, fg: colors.white, elevated: true },
+  secondary: { bg: colors.mint, fg: colors.primary },
+  outline: { bg: colors.white, fg: colors.primary, border: colors.primary },
   ghost: { bg: 'transparent', fg: colors.primary },
-  accent: { bg: colors.accent, fg: colors.primary },
+  accent: { bg: colors.accent, fg: colors.primary, elevated: true },
 };
 
 const SIZE_STYLES: Record<ButtonSize, { paddingV: number; paddingH: number; minHeight: number }> = {
   sm: { paddingV: spacing.xs, paddingH: spacing.md, minHeight: 36 },
-  md: { paddingV: spacing.sm, paddingH: spacing.lg, minHeight: touchTarget },
-  lg: { paddingV: spacing.md, paddingH: spacing.lg, minHeight: 56 },
+  md: { paddingV: spacing.sm, paddingH: spacing.lg, minHeight: 48 },
+  lg: { paddingV: spacing.sm + 2, paddingH: spacing.lg, minHeight: 52 },
+};
+
+const resolveOpacity = (isDisabled: boolean, pressed: boolean): number => {
+  if (isDisabled) return 0.55;
+  return pressed ? 0.9 : 1;
 };
 
 export const Button = ({
@@ -64,6 +71,7 @@ export const Button = ({
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.base,
+        palette.elevated && !isDisabled ? styles.elevated : null,
         {
           backgroundColor: palette.bg,
           borderColor: palette.border ?? 'transparent',
@@ -71,7 +79,7 @@ export const Button = ({
           paddingVertical: sizing.paddingV,
           paddingHorizontal: sizing.paddingH,
           minHeight: sizing.minHeight,
-          opacity: isDisabled ? 0.6 : pressed ? 0.85 : 1,
+          opacity: resolveOpacity(Boolean(isDisabled), pressed),
           width: fullWidth ? '100%' : undefined,
         },
         style,
@@ -94,10 +102,20 @@ export const Button = ({
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: radius.pill,
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  elevated: Platform.select({
+    ios: {
+      shadowColor: colors.primary,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.22,
+      shadowRadius: 12,
+    },
+    android: { elevation: 6 },
+    default: {},
+  }) as ViewStyle,
   content: {
     flexDirection: 'row',
     alignItems: 'center',

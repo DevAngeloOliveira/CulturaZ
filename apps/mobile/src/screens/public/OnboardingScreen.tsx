@@ -1,155 +1,121 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRef, useState } from 'react';
-import {
-  Dimensions,
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from 'react-native';
+import { useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/buttons/Button';
+import { SelectChip } from '@/components/forms/SelectChip';
 import { AppScreen } from '@/components/layout/AppScreen';
-import { colors, spacing, typography } from '@/theme';
-
-const { width } = Dimensions.get('window');
-
-interface Slide {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  description: string;
-}
-
-const slides: Slide[] = [
-  {
-    icon: 'library-outline',
-    title: 'Catálogo completo',
-    description: 'Encontre acadêmicos, técnicos, literatura e raros — tudo no mesmo lugar.',
-  },
-  {
-    icon: 'shield-checkmark-outline',
-    title: 'Vendedores avaliados',
-    description: 'Sebos verificados, condição visível e reputação real de quem já comprou.',
-  },
-  {
-    icon: 'sparkles-outline',
-    title: 'Revenda sem complicação',
-    description: 'Tem livros parados? Em poucos toques, ele entra na vitrine certa.',
-  },
-];
+import { colors, fontFamily, radius, spacing, typography } from '@/theme';
 
 interface OnboardingScreenProps {
-  onFinish: () => void;
+  onGetStarted: () => void;
+  onSignIn: () => void;
 }
 
-export const OnboardingScreen = ({ onFinish }: OnboardingScreenProps) => {
-  const [index, setIndex] = useState(0);
-  const listRef = useRef<FlatList<Slide>>(null);
+const INTERESTS = ['Acadêmicos', 'Literatura', 'Sebos'];
 
-  const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const newIndex = Math.round(event.nativeEvent.contentOffset.x / width);
-    setIndex(newIndex);
-  };
-
-  const handleNext = () => {
-    if (index < slides.length - 1) {
-      listRef.current?.scrollToIndex({ index: index + 1, animated: true });
-    } else {
-      onFinish();
-    }
-  };
+export const OnboardingScreen = ({ onGetStarted, onSignIn }: OnboardingScreenProps) => {
+  const [interest, setInterest] = useState(INTERESTS[0]);
 
   return (
     <AppScreen>
-      <FlatList
-        ref={listRef}
-        data={slides}
-        keyExtractor={(_, i) => String(i)}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onMomentumScrollEnd}
-        renderItem={({ item }) => (
-          <View style={[styles.slide, { width }]}>
-            <View style={styles.iconWrap}>
-              <Ionicons name={item.icon} size={56} color={colors.primary} />
-            </View>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.description}>{item.description}</Text>
-          </View>
-        )}
-      />
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <View style={styles.hero}>
+          <View style={styles.heroBlobTeal} />
+          <View style={styles.heroBlobAmber} />
+          <Text style={styles.heroText}>Garimpe{'\n'}livros</Text>
+        </View>
 
-      <View style={styles.dots}>
-        {slides.map((_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.dot,
-              { backgroundColor: i === index ? colors.primary : colors.border, width: i === index ? 22 : 8 },
-            ]}
-          />
-        ))}
-      </View>
+        <Text style={styles.heading}>Encontre obras novas e usadas perto de você.</Text>
+        <Text style={styles.body}>
+          Compare preços, condições e vendedores em uma experiência simples, acolhedora e
+          segura.
+        </Text>
 
-      <View style={styles.actions}>
-        <Button label="Pular" variant="ghost" size="md" onPress={onFinish} />
-        <Button
-          label={index === slides.length - 1 ? 'Começar' : 'Próximo'}
-          variant="primary"
-          size="md"
-          onPress={handleNext}
-          rightIcon="arrow-forward"
-        />
-      </View>
+        <View style={styles.chips}>
+          {INTERESTS.map((item) => (
+            <SelectChip
+              key={item}
+              label={item}
+              selected={interest === item}
+              onPress={() => setInterest(item)}
+            />
+          ))}
+        </View>
+
+        <View style={styles.actions}>
+          <Button label="Começar agora" fullWidth onPress={onGetStarted} />
+          <Button label="Já tenho conta" variant="outline" fullWidth onPress={onSignIn} />
+        </View>
+      </ScrollView>
     </AppScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  slide: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xxl,
+  scroll: {
+    flexGrow: 1,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
-  iconWrap: {
-    width: 120,
-    height: 120,
-    borderRadius: 32,
-    backgroundColor: colors.primaryMuted,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xl,
+  hero: {
+    height: 205,
+    borderRadius: radius.lg,
+    backgroundColor: colors.primary,
+    overflow: 'hidden',
+    padding: spacing.lg,
+    justifyContent: 'flex-end',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.18,
+    shadowRadius: 15,
+    elevation: 8,
   },
-  title: {
-    ...typography.displayMd,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
+  heroBlobTeal: {
+    position: 'absolute',
+    width: 320,
+    height: 320,
+    borderRadius: 160,
+    backgroundColor: colors.secondary,
+    right: -90,
+    bottom: -70,
+    opacity: 0.85,
   },
-  description: {
+  heroBlobAmber: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: colors.accent,
+    right: -100,
+    bottom: -110,
+    opacity: 0.95,
+  },
+  heroText: {
+    fontFamily: fontFamily.inter600,
+    fontSize: 34,
+    lineHeight: 40,
+    color: colors.white,
+  },
+  heading: {
+    fontFamily: fontFamily.frauncesRegular,
+    fontSize: 30,
+    lineHeight: 35,
+    color: colors.primary,
+    marginTop: spacing.xs,
+  },
+  body: {
     ...typography.body,
     color: colors.textSecondary,
-    textAlign: 'center',
   },
-  dots: {
+  chips: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    marginVertical: spacing.lg,
-  },
-  dot: {
-    height: 8,
-    borderRadius: 4,
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
   },
   actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.lg,
+    marginTop: 'auto',
+    gap: spacing.sm,
+    paddingTop: spacing.md,
   },
 });

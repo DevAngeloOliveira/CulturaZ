@@ -25,7 +25,10 @@ export const PublicStack = () => (
     </Stack.Screen>
     <Stack.Screen name="Onboarding">
       {({ navigation }) => (
-        <OnboardingScreen onFinish={() => navigation.replace('Login')} />
+        <OnboardingScreen
+          onGetStarted={() => navigation.navigate('Register')}
+          onSignIn={() => navigation.navigate('Login')}
+        />
       )}
     </Stack.Screen>
     <Stack.Screen name="Login">
@@ -37,7 +40,12 @@ export const PublicStack = () => (
       )}
     </Stack.Screen>
     <Stack.Screen name="Register">
-      {({ navigation }) => <RegisterScreen onBack={() => navigation.goBack()} />}
+      {({ navigation }) => (
+        <RegisterScreen
+          onBack={() => navigation.goBack()}
+          onSignIn={() => navigation.navigate('Login')}
+        />
+      )}
     </Stack.Screen>
     <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
   </Stack.Navigator>

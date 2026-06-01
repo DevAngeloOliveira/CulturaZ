@@ -1,17 +1,18 @@
 import {
+  Fraunces_400Regular,
   Fraunces_500Medium,
-  Fraunces_600SemiBold,
   useFonts as useFraunces,
 } from '@expo-google-fonts/fraunces';
 import {
   Inter_400Regular,
-  Inter_500Medium,
   Inter_600SemiBold,
+  Inter_900Black,
   useFonts as useInter,
 } from '@expo-google-fonts/inter';
 import type { ReactNode } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { LoadingState } from '@/components/feedback/LoadingState';
+import { colors } from '@/theme';
 
 interface FontProviderProps {
   children: ReactNode;
@@ -19,18 +20,31 @@ interface FontProviderProps {
 
 export const FontProvider = ({ children }: FontProviderProps) => {
   const [fraunces] = useFraunces({
+    Fraunces_400Regular,
     Fraunces_500Medium,
-    Fraunces_600SemiBold,
   });
   const [inter] = useInter({
     Inter_400Regular,
-    Inter_500Medium,
     Inter_600SemiBold,
+    Inter_900Black,
   });
 
   if (!fraunces || !inter) {
-    return <LoadingState message="Carregando tipografia" />;
+    return (
+      <View style={styles.fallback}>
+        <ActivityIndicator color={colors.primary} size="large" />
+      </View>
+    );
   }
 
   return <>{children}</>;
 };
+
+const styles = StyleSheet.create({
+  fallback: {
+    flex: 1,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

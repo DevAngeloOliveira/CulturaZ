@@ -50,10 +50,12 @@ export const SellerCard = ({ seller, onPress }: SellerCardProps) => (
         <Ionicons name="star" size={14} color={colors.accent} />
         <Text style={styles.statText}>{formatRating(seller.rating)} de avaliação</Text>
       </View>
-      <View style={styles.stat}>
-        <Ionicons name="library-outline" size={14} color={colors.textSecondary} />
-        <Text style={styles.statText}>{seller.activeListingsCount} anúncios</Text>
-      </View>
+      {typeof seller.activeListingsCount === 'number' ? (
+        <View style={styles.stat}>
+          <Ionicons name="library-outline" size={14} color={colors.textSecondary} />
+          <Text style={styles.statText}>{seller.activeListingsCount} anúncios</Text>
+        </View>
+      ) : null}
     </View>
 
     {seller.isVerified ? (

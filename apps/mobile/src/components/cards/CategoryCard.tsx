@@ -24,7 +24,9 @@ export const CategoryCard = ({ category, onPress }: CategoryCardProps) => (
     <Text style={styles.name} numberOfLines={1}>
       {category.name}
     </Text>
-    <Text style={styles.count}>{category.booksCount.toLocaleString('pt-BR')} livros</Text>
+    {typeof category.booksCount === 'number' ? (
+      <Text style={styles.count}>{category.booksCount.toLocaleString('pt-BR')} livros</Text>
+    ) : null}
   </Pressable>
 );
 

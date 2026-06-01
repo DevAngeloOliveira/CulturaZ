@@ -10,8 +10,8 @@ export interface SellerProfile {
   description?: string;
   type: SellerType;
   rating: number;
-  activeListingsCount: number;
   status: SellerStatus;
+  activeListingsCount?: number;
   isVerified?: boolean;
   city?: string;
   state?: string;

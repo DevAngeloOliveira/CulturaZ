@@ -1,8 +1,8 @@
 import { Platform, TextStyle } from 'react-native';
 
-const fraunces = Platform.select({
-  ios: 'Fraunces_600SemiBold',
-  android: 'Fraunces_600SemiBold',
+const frauncesRegular = Platform.select({
+  ios: 'Fraunces_400Regular',
+  android: 'Fraunces_400Regular',
   default: 'serif',
 });
 
@@ -18,24 +18,24 @@ const inter400 = Platform.select({
   default: 'System',
 });
 
-const inter500 = Platform.select({
-  ios: 'Inter_500Medium',
-  android: 'Inter_500Medium',
-  default: 'System',
-});
-
 const inter600 = Platform.select({
   ios: 'Inter_600SemiBold',
   android: 'Inter_600SemiBold',
   default: 'System',
 });
 
+const inter900 = Platform.select({
+  ios: 'Inter_900Black',
+  android: 'Inter_900Black',
+  default: 'System',
+});
+
 export const fontFamily = {
-  fraunces,
+  frauncesRegular,
   fraunces500,
   inter400,
-  inter500,
   inter600,
+  inter900,
 } as const;
 
 export const typography: Record<
@@ -53,19 +53,19 @@ export const typography: Record<
   TextStyle
 > = {
   displayLg: {
-    fontFamily: fraunces,
+    fontFamily: frauncesRegular,
     fontSize: 34,
     lineHeight: 40,
     letterSpacing: -0.4,
   },
   displayMd: {
-    fontFamily: fraunces,
+    fontFamily: frauncesRegular,
     fontSize: 28,
-    lineHeight: 34,
+    lineHeight: 33,
     letterSpacing: -0.2,
   },
   titleLg: {
-    fontFamily: fraunces,
+    fontFamily: frauncesRegular,
     fontSize: 22,
     lineHeight: 28,
   },
@@ -75,9 +75,9 @@ export const typography: Record<
     lineHeight: 24,
   },
   titleSm: {
-    fontFamily: inter600,
-    fontSize: 16,
-    lineHeight: 22,
+    fontFamily: inter900,
+    fontSize: 15,
+    lineHeight: 21,
   },
   body: {
     fontFamily: inter400,
@@ -90,26 +90,25 @@ export const typography: Record<
     lineHeight: 22,
   },
   label: {
-    fontFamily: inter500,
-    fontSize: 13,
-    lineHeight: 18,
+    fontFamily: inter900,
+    fontSize: 11,
+    lineHeight: 16.5,
   },
   caption: {
     fontFamily: inter400,
     fontSize: 12,
-    lineHeight: 16,
+    lineHeight: 17,
   },
   button: {
-    fontFamily: inter600,
-    fontSize: 15,
+    fontFamily: inter900,
+    fontSize: 13,
     lineHeight: 20,
-    letterSpacing: 0.2,
   },
   eyebrow: {
-    fontFamily: inter600,
+    fontFamily: inter900,
     fontSize: 11,
     lineHeight: 14,
-    letterSpacing: 1.6,
+    letterSpacing: 1.4,
     textTransform: 'uppercase',
   },
 };

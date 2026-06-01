@@ -1,9 +1,12 @@
-import type { BookResponse, Paged } from '@/types/api';
+import type { BookResponse, CreateBookRequest, Paged } from '@/types/api';
 
 import { httpClient } from '../http';
 
 export interface BookSearchParams {
   q?: string;
+  categoryId?: string;
+  author?: string;
+  isbn?: string;
   page?: number;
   size?: number;
 }
@@ -14,4 +17,7 @@ export const booksApi = {
 
   getById: (id: string): Promise<BookResponse> =>
     httpClient.get<BookResponse>(`/api/books/${id}`, { auth: false }),
+
+  create: (body: CreateBookRequest): Promise<BookResponse> =>
+    httpClient.post<BookResponse>('/api/books', { body }),
 };

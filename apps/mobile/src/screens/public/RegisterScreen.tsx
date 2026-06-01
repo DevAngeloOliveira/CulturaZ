@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -10,61 +11,75 @@ import {
 } from 'react-native';
 
 import { Button } from '@/components/buttons/Button';
+import { IconButton } from '@/components/buttons/IconButton';
 import { PasswordField } from '@/components/forms/PasswordField';
 import { TextField } from '@/components/forms/TextField';
-import { AppHeader } from '@/components/layout/AppHeader';
 import { AppScreen } from '@/components/layout/AppScreen';
 import { useAuthStore } from '@/stores/auth.store';
-import { colors, spacing, typography } from '@/theme';
+import { colors, fontFamily, radius, spacing, typography } from '@/theme';
+import { getErrorMessage } from '@/utils/apiErrors';
 
 interface RegisterScreenProps {
   onBack: () => void;
+  onSignIn: () => void;
 }
 
-export const RegisterScreen = ({ onBack }: RegisterScreenProps) => {
+export const RegisterScreen = ({ onBack, onSignIn }: RegisterScreenProps) => {
   const register = useAuthStore((s) => s.register);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isValid = name.length >= 2 && email.includes('@') && password.length >= 8;
+  const isValid = name.trim().length >= 2 && email.includes('@') && password.length >= 8;
 
   const handleSubmit = async () => {
+    if (loading || !isValid) return;
     setError(null);
     setLoading(true);
     try {
-      await register({ name: name.trim(), email: email.trim(), password });
-    } catch {
-      setError('Não foi possível criar a conta. Tente novamente.');
+      const trimmedPhone = phone.trim();
+      await register({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        ...(trimmedPhone ? { phone: trimmedPhone } : {}),
+      });
+    } catch (err) {
+      setError(getErrorMessage(err, 'Não foi possível criar a conta. Tente novamente.'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AppScreen background={colors.background}>
-      <AppHeader title="Criar conta" onBack={onBack} />
+    <AppScreen>
+      <StatusBar style="dark" />
+      <View style={styles.topBar}>
+        <IconButton icon="chevron-back" color={colors.primary} onPress={onBack} />
+      </View>
       <KeyboardAvoidingView
-        style={styles.kav}
+        style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.intro}>
-            <Text style={styles.title}>Vamos começar</Text>
-            <Text style={styles.subtitle}>
-              Em poucos passos você está pronto para comprar e vender no CulturaZ.
-            </Text>
+            <Text style={styles.eyebrow}>Nova conta</Text>
+            <Text style={styles.title}>Crie seu acesso ao CulturaZ.</Text>
           </View>
 
           <View style={styles.form}>
             <TextField
-              label="Nome completo"
-              placeholder="Como devemos te chamar?"
+              label="Nome"
+              placeholder="Seu nome completo"
               value={name}
               onChangeText={setName}
-              leftIcon="person-outline"
               autoComplete="name"
             />
             <TextField
@@ -75,36 +90,41 @@ export const RegisterScreen = ({ onBack }: RegisterScreenProps) => {
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
-              leftIcon="mail-outline"
+            />
+            <TextField
+              label="Telefone"
+              placeholder="(11) 99999-0000"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              autoComplete="tel"
             />
             <PasswordField
               label="Senha"
               placeholder="Mínimo 8 caracteres"
               value={password}
               onChangeText={setPassword}
-              leftIcon="lock-closed-outline"
               helper="Inclua letras e números para mais segurança."
-              error={error ?? undefined}
             />
-          </View>
 
-          <View style={styles.terms}>
-            <Text style={styles.termsText}>
-              Ao criar conta, você concorda com nossos Termos de Uso e Política de Privacidade.
-            </Text>
+            {error ? <Text style={styles.error}>{error}</Text> : null}
           </View>
 
           <Button
-            label="Criar conta"
-            size="lg"
+            label="Cadastrar"
             fullWidth
             loading={loading}
             disabled={!isValid}
             onPress={handleSubmit}
-            style={styles.submit}
           />
 
-          <Pressable onPress={onBack} hitSlop={4} style={styles.loginRow}>
+          <View style={styles.note}>
+            <Text style={styles.noteText}>
+              Depois você pode ativar seu perfil de vendedor na área de perfil.
+            </Text>
+          </View>
+
+          <Pressable onPress={onSignIn} hitSlop={6} style={styles.loginRow}>
             <Text style={styles.loginText}>Já tem uma conta?</Text>
             <Text style={styles.loginLink}>Entrar</Text>
           </Pressable>
@@ -115,43 +135,54 @@ export const RegisterScreen = ({ onBack }: RegisterScreenProps) => {
 };
 
 const styles = StyleSheet.create({
-  kav: {
+  flex: {
     flex: 1,
+  },
+  topBar: {
+    paddingHorizontal: spacing.sm,
+    paddingTop: spacing.xs,
   },
   scroll: {
     flexGrow: 1,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.lg,
     gap: spacing.lg,
   },
   intro: {
     gap: spacing.xs,
   },
-  title: {
-    ...typography.displayMd,
-    color: colors.textPrimary,
-  },
-  subtitle: {
-    ...typography.body,
+  eyebrow: {
+    ...typography.label,
     color: colors.textSecondary,
+  },
+  title: {
+    fontFamily: fontFamily.frauncesRegular,
+    fontSize: 33,
+    lineHeight: 37,
+    color: colors.primary,
   },
   form: {
     gap: spacing.md,
   },
-  terms: {
-    paddingHorizontal: spacing.xs,
-  },
-  termsText: {
+  error: {
     ...typography.caption,
-    color: colors.textSecondary,
+    color: colors.error,
   },
-  submit: {
-    marginTop: spacing.xs,
+  note: {
+    backgroundColor: colors.mint,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+  },
+  noteText: {
+    ...typography.caption,
+    color: colors.primary,
   },
   loginRow: {
     flexDirection: 'row',
     alignSelf: 'center',
     gap: spacing.xs,
-    marginTop: spacing.md,
+    marginTop: 'auto',
+    paddingTop: spacing.sm,
   },
   loginText: {
     ...typography.body,

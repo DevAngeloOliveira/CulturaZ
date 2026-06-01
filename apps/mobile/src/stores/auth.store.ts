@@ -18,9 +18,10 @@ interface AuthState {
   register: (payload: RegisterRequest) => Promise<UserResponse>;
   logout: () => Promise<void>;
   switchRole: (role: ApiUserRole) => void;
+  addRole: (role: ApiUserRole) => void;
 }
 
-const ROLE_PRIORITY: ApiUserRole[] = ['CUSTOMER', 'SELLER', 'ADMIN', 'SUPPORT'];
+const ROLE_PRIORITY: ApiUserRole[] = ['ADMIN', 'SUPPORT', 'SELLER', 'CUSTOMER'];
 
 const pickActiveRole = (roles: ApiUserRole[]): ApiUserRole =>
   ROLE_PRIORITY.find((role) => roles.includes(role)) ?? 'CUSTOMER';
@@ -45,16 +46,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   hydrate: async () => {
     set({ status: 'hydrating' });
-    const tokens = await loadSession();
-    if (!tokens) {
-      set(guestState);
-      return;
-    }
     try {
-      const user = await authApi.me();
-      set(authenticatedState(user));
-    } catch {
-      await clearSession();
+      const tokens = await loadSession();
+      if (!tokens) {
+        set(guestState);
+        return;
+      }
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      try {
+        const user = await authApi.me(controller.signal);
+        set(authenticatedState(user));
+      } finally {
+        clearTimeout(timeout);
+      }
+    } catch (error) {
+      console.warn('[auth] falha ao hidratar a sessão:', error);
+      await clearSession().catch(() => undefined);
       set(guestState);
     }
   },
@@ -88,6 +96,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (get().user?.roles.includes(role)) {
       set({ activeRole: role });
     }
+  },
+
+  addRole: (role) => {
+    const state = get();
+    if (!state.user) return;
+    if (state.user.roles.includes(role)) {
+      set({ activeRole: role });
+      return;
+    }
+    set({
+      user: { ...state.user, roles: [...state.user.roles, role] },
+      activeRole: role,
+    });
   },
 }));
 

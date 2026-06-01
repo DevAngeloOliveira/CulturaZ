@@ -725,8 +725,7 @@ CulturaZ/
 │   ├── api-contracts.md           # Endpoints REST (tabela)
 │   ├── figma-ui-ux.md             # Design System, componentes, fluxos
 │   ├── roadmap.md                 # Fases de entrega (E1-E10)
-│   ├── decisoes-arquiteturais.md  # ADRs (Architecture Decision Records)
-│   └── portfolio-linkedin.md      # Como apresentar o projeto
+│   └──  decisoes-arquiteturais.md  # ADRs (Architecture Decision Records)      
 │
 ├── 🐳 infra/
 │   ├── docker-compose.yml         # PostgreSQL + Adminer

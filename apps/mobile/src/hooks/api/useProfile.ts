@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { usersApi } from '@/services/api';
+import { useAuthStore } from '@/stores/auth.store';
 import type { AddressRequest, UpdateUserRequest } from '@/types/api';
 
 import { queryKeys } from './queryKeys';
@@ -16,7 +17,10 @@ export const useUpdateProfileMutation = () => {
   const client = useQueryClient();
   return useMutation({
     mutationFn: (body: UpdateUserRequest) => usersApi.updateMe(body),
-    onSuccess: (user) => client.setQueryData(queryKeys.me, user),
+    onSuccess: (user) => {
+      client.setQueryData(queryKeys.me, user);
+      useAuthStore.setState({ user });
+    },
   });
 };
 

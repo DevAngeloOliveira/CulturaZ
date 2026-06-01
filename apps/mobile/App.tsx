@@ -7,6 +7,7 @@ import { FontProvider } from '@/app/providers/FontProvider';
 import { QueryProvider } from '@/app/providers/QueryProvider';
 import { ThemeProvider } from '@/app/providers/ThemeProvider';
 import { RootNavigator } from '@/app/navigation/RootNavigator';
+import { ToastHost } from '@/components/feedback/Toast';
 import { useAuthStore } from '@/stores/auth.store';
 
 export default function App() {
@@ -21,8 +22,9 @@ export default function App() {
       <QueryProvider>
         <ThemeProvider>
           <FontProvider>
-            <StatusBar style="light" />
+            <StatusBar style="dark" />
             <RootNavigator />
+            <ToastHost />
           </FontProvider>
         </ThemeProvider>
       </QueryProvider>

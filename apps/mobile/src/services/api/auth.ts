@@ -14,7 +14,8 @@ export const authApi = {
   register: (body: RegisterRequest): Promise<AuthResponse> =>
     httpClient.post<AuthResponse>('/api/auth/register', { body, auth: false }),
 
-  me: (): Promise<UserResponse> => httpClient.get<UserResponse>('/api/auth/me'),
+  me: (signal?: AbortSignal): Promise<UserResponse> =>
+    httpClient.get<UserResponse>('/api/auth/me', { signal }),
 
   logout: (): Promise<void> => httpClient.post<void>('/api/auth/logout'),
 };

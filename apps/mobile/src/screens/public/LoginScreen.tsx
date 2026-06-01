@@ -1,3 +1,4 @@
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -14,7 +15,8 @@ import { PasswordField } from '@/components/forms/PasswordField';
 import { TextField } from '@/components/forms/TextField';
 import { AppScreen } from '@/components/layout/AppScreen';
 import { useAuthStore } from '@/stores/auth.store';
-import { colors, spacing, typography } from '@/theme';
+import { colors, fontFamily, radius, spacing, typography } from '@/theme';
+import { getErrorMessage } from '@/utils/apiErrors';
 
 interface LoginScreenProps {
   onNavigateToRegister: () => void;
@@ -28,31 +30,45 @@ export const LoginScreen = ({
   const login = useAuthStore((s) => s.login);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const canSubmit = email.trim().length > 3 && password.length >= 1;
+
   const handleSubmit = async () => {
+    if (loading) return;
     setError(null);
     setLoading(true);
     try {
-      await login(email, password);
-    } catch {
-      setError('Não foi possível entrar. Tente novamente.');
+      await login(email.trim(), password);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Não foi possível entrar. Tente novamente.'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AppScreen background={colors.background}>
+    <AppScreen>
+      <StatusBar style="dark" />
       <KeyboardAvoidingView
-        style={styles.kav}
+        style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
-            <Text style={styles.title}>Bem-vindo de volta</Text>
-            <Text style={styles.subtitle}>Entre para continuar garimpando.</Text>
+            <View style={styles.headerText}>
+              <Text style={styles.eyebrow}>Bem-vindo de volta</Text>
+              <Text style={styles.title}>Entre na sua biblioteca circular.</Text>
+            </View>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>Cz</Text>
+            </View>
           </View>
 
           <View style={styles.form}>
@@ -64,36 +80,46 @@ export const LoginScreen = ({
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
-              leftIcon="mail-outline"
             />
             <PasswordField
               label="Senha"
               placeholder="Sua senha"
               value={password}
               onChangeText={setPassword}
-              leftIcon="lock-closed-outline"
-              error={error ?? undefined}
             />
-            <Pressable onPress={onNavigateToForgotPassword} hitSlop={4}>
-              <Text style={styles.forgot}>Esqueci minha senha</Text>
-            </Pressable>
+
+            <View style={styles.metaRow}>
+              <Pressable
+                onPress={() => setRemember((v) => !v)}
+                style={[styles.remember, remember ? styles.rememberOn : styles.rememberOff]}
+              >
+                <Text style={styles.rememberText}>Lembrar</Text>
+              </Pressable>
+              <Pressable onPress={onNavigateToForgotPassword} hitSlop={6}>
+                <Text style={styles.link}>Esqueci a senha</Text>
+              </Pressable>
+            </View>
+
+            {error ? <Text style={styles.error}>{error}</Text> : null}
           </View>
 
-          <Button
-            label="Entrar"
-            size="lg"
-            fullWidth
-            loading={loading}
-            onPress={handleSubmit}
-            style={styles.submit}
-          />
-
-          <View style={styles.registerRow}>
-            <Text style={styles.registerText}>Novo por aqui?</Text>
-            <Pressable onPress={onNavigateToRegister} hitSlop={4}>
-              <Text style={styles.registerLink}>Criar conta</Text>
-            </Pressable>
+          <View style={styles.actions}>
+            <Button
+              label="Entrar"
+              fullWidth
+              loading={loading}
+              disabled={!canSubmit}
+              onPress={handleSubmit}
+            />
+            <Button
+              label="Criar conta"
+              variant="secondary"
+              fullWidth
+              onPress={onNavigateToRegister}
+            />
           </View>
+
+          <Text style={styles.footer}>Acesse catálogo, carrinho, pedidos e área de venda.</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </AppScreen>
@@ -101,51 +127,93 @@ export const LoginScreen = ({
 };
 
 const styles = StyleSheet.create({
-  kav: {
+  flex: {
     flex: 1,
   },
   scroll: {
     flexGrow: 1,
-    padding: spacing.lg,
+    padding: spacing.md,
     gap: spacing.lg,
   },
   header: {
-    marginTop: spacing.xl,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    marginTop: spacing.sm,
+  },
+  headerText: {
+    flex: 1,
     gap: spacing.xs,
   },
-  title: {
-    ...typography.displayMd,
-    color: colors.textPrimary,
-  },
-  subtitle: {
-    ...typography.body,
+  eyebrow: {
+    ...typography.label,
     color: colors.textSecondary,
+  },
+  title: {
+    fontFamily: fontFamily.frauncesRegular,
+    fontSize: 33,
+    lineHeight: 36,
+    color: colors.primary,
+  },
+  badge: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.sm + 3,
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    fontFamily: fontFamily.inter900,
+    fontSize: 16,
+    color: colors.primary,
   },
   form: {
     gap: spacing.md,
   },
-  forgot: {
-    ...typography.label,
-    color: colors.secondary,
-    alignSelf: 'flex-end',
-  },
-  submit: {
-    marginTop: spacing.sm,
-  },
-  registerRow: {
+  metaRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: 'auto',
-    paddingTop: spacing.md,
+    justifyContent: 'space-between',
   },
-  registerText: {
-    ...typography.body,
+  remember: {
+    height: 32,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+  },
+  rememberOn: {
+    backgroundColor: colors.mint,
+    borderColor: colors.mint,
+  },
+  rememberOff: {
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+  },
+  rememberText: {
+    ...typography.label,
+    color: colors.primary,
+  },
+  link: {
+    ...typography.label,
     color: colors.textSecondary,
   },
-  registerLink: {
-    ...typography.bodyStrong,
-    color: colors.primary,
+  error: {
+    ...typography.caption,
+    color: colors.error,
+  },
+  actions: {
+    gap: spacing.sm,
+  },
+  footer: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 'auto',
+    paddingTop: spacing.sm,
   },
 });

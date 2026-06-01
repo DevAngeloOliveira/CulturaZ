@@ -27,13 +27,14 @@ export const SelectChip = ({ label, selected, onPress, style }: SelectChipProps)
 
 const styles = StyleSheet.create({
   base: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 2,
+    height: 32,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm + 4,
     borderRadius: radius.pill,
     borderWidth: 1,
   },
   idle: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.white,
     borderColor: colors.border,
   },
   selected: {

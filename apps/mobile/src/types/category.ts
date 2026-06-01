@@ -4,6 +4,6 @@ export interface Category {
   id: UUID;
   name: string;
   icon: string;
-  booksCount: number;
   active: boolean;
+  booksCount?: number;
 }

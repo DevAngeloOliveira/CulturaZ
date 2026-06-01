@@ -22,8 +22,10 @@ export const bottomTabScreenOptions: BottomTabNavigationOptions = {
 
 type IoniconName = keyof typeof Ionicons.glyphMap;
 
-export const tabIcon =
-  (name: IoniconName) =>
-  ({ color, size }: { color: string; size: number }) => (
+export const tabIcon = (name: IoniconName) => {
+  const TabIcon = ({ color, size }: { color: string; size: number }) => (
     <Ionicons name={name} size={size} color={color} />
   );
+  TabIcon.displayName = `TabIcon(${name})`;
+  return TabIcon;
+};
