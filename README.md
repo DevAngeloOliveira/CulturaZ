@@ -1,509 +1,154 @@
 # CulturaZ
 
-> Marketplace mobile-first para compra, venda e revenda de livros, desenvolvido em monorepo com **React Native (Expo)**, **Kotlin + Spring Boot** e **PostgreSQL**.
+> Marketplace mobile-first para compra, venda e revenda de livros — fluxo completo de **comprador, vendedor e administrador** em um monorepo com React Native (Expo), Kotlin + Spring Boot e PostgreSQL.
 
-[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-orange)]()
-[![Mobile](https://img.shields.io/badge/mobile-React%20Native%20%2B%20Expo-blue)]()
-[![Backend](https://img.shields.io/badge/backend-Kotlin%20%2B%20Spring%20Boot%203-purple)]()
-[![Database](https://img.shields.io/badge/database-PostgreSQL%2016-336791)]()
+[![Status](https://img.shields.io/badge/status-MVP%20completo-brightgreen)](#status-do-projeto)
+[![Mobile](https://img.shields.io/badge/mobile-Expo%20SDK%2051-blue)](#stack)
+[![Backend](https://img.shields.io/badge/backend-Spring%20Boot%203.3-purple)](#stack)
+[![DB](https://img.shields.io/badge/database-PostgreSQL%2016-336791)](#stack)
+[![Endpoints](https://img.shields.io/badge/REST%20endpoints-53-success)](packages/contracts/openapi.yaml)
 
----
+## TL;DR
 
-## 📋 Sumário
-
-- [Sobre o Projeto](#-sobre-o-projeto)
-- [Problema](#-problema)
-- [Objetivos](#-objetivos)
-- [Público-Alvo & Personas](#-público-alvo--personas)
-- [Escopo Funcional](#-escopo-funcional)
-- [Stack Tecnológico](#-stack-tecnológico)
-- [Arquitetura](#-arquitetura)
-- [Estrutura do Monorepo](#-estrutura-do-monorepo)
-- [Como Rodar Localmente](#-como-rodar-localmente)
-- [Documentação](#-documentação)
-- [Especificação de Endpoints](#-especificação-de-endpoints)
-- [Modelo de Dados](#-modelo-de-dados)
-- [Requisitos Não-Funcionais](#-requisitos-não-funcionais)
+App **React Native + TypeScript** integrado a uma API **Spring Boot + Kotlin** com 53 endpoints REST, autenticação JWT (refresh + rotação), 13 tabelas em PostgreSQL com Flyway, e três personas vivas (CUSTOMER, SELLER, ADMIN) gateadas no router por role. Stack roda em Docker Compose. Tipos do mobile gerados a partir do OpenAPI. Sem mocks no app, sem dependências nativas extras além do Expo SDK.
 
 ---
 
-## 🎯 Sobre o Projeto
+## Sumário
 
-**CulturaZ** é uma plataforma mobile-first para compra, venda e revenda de livros, conectando leitores, estudantes, sebos, pequenos vendedores e pessoas que desejam circular livros novos ou usados.
-
-A proposta é criar um marketplace literário onde usuários possam:
-
-- Comprar livros novos e usados de forma segura
-- Anunciar e gerenciar seus próprios livros para revenda
-- Acompanhar pedidos e transações
-- Avaliar e consultar reputação de vendedores
-- Participar de uma economia circular voltada ao conhecimento
-
-O projeto é desenvolvido com postura de **produto real em evolução**, não apenas como MVP acadêmico, permitindo evolução futura para pagamentos reais, frete integrado, notificações, moderação avançada e escalabilidade operacional.
-
----
-
-## 🚨 Problema
-
-Muitas pessoas possuem livros parados em casa, enquanto estudantes, leitores e profissionais procuram livros com preços mais acessíveis. A revenda de livros acontece de forma fragmentada em grupos de WhatsApp, redes sociais, sebos físicos ou marketplaces genéricos.
-
-**Problemas identificados:**
-- Baixa organização e busca ineficiente de anúncios
-- Dificuldade de busca por título, autor, categoria ou ISBN
-- Pouca confiança entre comprador e vendedor
-- Ausência de reputação clara do vendedor
-- Baixa visibilidade para sebos e pequenos vendedores
-- Falta de experiência mobile especializada em livros
+- [Sobre o projeto](#sobre-o-projeto)
+- [Status do projeto](#status-do-projeto)
+- [Funcionalidades por perfil](#funcionalidades-por-perfil)
+- [Stack](#stack)
+- [Arquitetura](#arquitetura)
+- [Estrutura do monorepo](#estrutura-do-monorepo)
+- [Como rodar localmente](#como-rodar-localmente)
+- [Credenciais de desenvolvimento](#credenciais-de-desenvolvimento)
+- [Documentação adicional](#documentação-adicional)
+- [Decisões técnicas em destaque](#decisões-técnicas-em-destaque)
+- [Roadmap futuro](#roadmap-futuro)
+- [Autor e licença](#autor-e-licença)
 
 ---
 
-## 🎯 Objetivos
+## Sobre o projeto
 
-### Objetivo Geral
+CulturaZ é uma plataforma mobile-first para compra, venda e revenda de livros, com proposta de:
 
-Desenvolver uma plataforma mobile-first para venda e revenda de livros, com aplicativo em React Native, API em Kotlin Spring Boot e banco PostgreSQL, permitindo que compradores, vendedores e administradores interajam em um ecossistema digital de marketplace literário.
+- **Catálogo focado em livro** — título, autor, editora, ISBN, ano, condição (NEW/LIKE_NEW/GOOD/FAIR/DAMAGED) e estoque por anúncio.
+- **Confiança via reputação** — avaliações pós-entrega com estrelas, tags e comentário, alimentando o rating médio do vendedor.
+- **Suporte a três tipos de vendedor** — vendedor individual, livraria e sebo, com perfis e fluxos dedicados.
+- **Moderação centralizada** — todo anúncio passa por `PENDING_REVIEW` e só vira público quando admin aprova.
+- **Pagamento simulado** — checkout completo do ponto de vista de fluxo (carrinho, endereço, status do pedido), com `paymentMethod=SIMULATED` enquanto o gateway real não é integrado.
 
-### Objetivos Específicos
-
-- ✅ Permitir cadastro e autenticação de usuários (JWT)
-- ✅ Suportar dois perfis: comprador e vendedor
-- ✅ Permitir cadastro, busca e filtros de livros
-- ✅ Implementar sistema de anúncios com moderação
-- ✅ Suportar favoritos e carrinho de compras
-- ✅ Viabilizar checkout com pagamento simulado
-- ✅ Rastrear pedidos e status
-- ✅ Implementar avaliações e reputação de vendedores
-- ✅ Oferecer painel administrativo
-- ✅ Preparar base técnica escalável para evolução futura
+Desenvolvido em contexto acadêmico mas **modelado como produto real**: separação por domínios, contratos OpenAPI como fonte de verdade, migrações versionadas, role-based access em todos endpoints sensíveis, navegação por role no router do mobile.
 
 ---
 
-## 👥 Público-Alvo & Personas
+## Status do projeto
 
-### Público-Alvo
+O ciclo de implementação foi entregue em **8 sprints**, todas concluídas. App e API estão integrados ponta a ponta — typecheck e lint zerados, dependências alinhadas via `expo install --check`.
 
-- Estudantes universitários
-- Leitores frequentes
-- Professores
-- Profissionais que compram livros técnicos
-- Pessoas que desejam vender livros usados
-- Sebos e pequenas livrarias
-- Clubes de leitura
+| Sprint                                       | Status |
+| -------------------------------------------- | ------ |
+| 0 — Desbloquear boot (sem dep nativa extra)  | ✅      |
+| 1 — Home consumindo API real                 | ✅      |
+| 2 — Catálogo, Filtros, Detalhes, Favoritos   | ✅      |
+| 3 — Carrinho e Checkout                      | ✅      |
+| 4 — Pedidos e Avaliações                     | ✅      |
+| 5 — Perfil e Endereços                       | ✅      |
+| 6 — Fluxo Vendedor                           | ✅      |
+| 7 — Fluxo Admin                              | ✅      |
+| 8 — Hardening (toasts, lint, mocks removidos)| ✅      |
 
-### Personas Principais
+Métricas do mobile:
 
-**Lucas — Comprador Estudante**
-- Objetivo: encontrar livros acadêmicos com preço acessível
-- Dor: livros novos são caros; livros usados estão espalhados
-- Solução CulturaZ: busca por título, autor, preço, condição e reputação
-
-**Mariana — Revendedora Casual**
-- Objetivo: vender livros parados em casa
-- Dor: depende de redes sociais desorganizadas
-- Solução CulturaZ: criar loja simples, cadastrar anúncios, acompanhar pedidos
-
-**Sebo Página Viva — Vendedor Commercial**
-- Objetivo: digitalizar acervo e alcançar novos compradores
-- Dor: baixa presença digital, catálogo desorganizado
-- Solução CulturaZ: perfil de loja, catálogo estruturado, relatórios
+- **~40 telas** distribuídas em 4 buckets de navegação (public, buyer, seller, admin).
+- **~50 componentes** reutilizáveis (cards, forms, feedback, marketplace, layout).
+- **30 hooks de query/mutation** (TanStack Query) organizados por domínio.
+- **~37 endpoints REST consumidos** sobre os 53 totais (não usamos `/api/health`, alguns `/api/admin/*` raros, e admin login não tem fluxo separado — login normal + role check basta).
+- **2 stores Zustand** (`auth`, `catalog`) + `useToastStore` interno.
 
 ---
 
-## 📦 Escopo Funcional
+## Funcionalidades por perfil
 
-O CulturaZ deve contemplar os seguintes módulos:
+### 🛒 Comprador (CUSTOMER)
 
-1. **Autenticação e Conta** — Cadastro, login, recuperação de senha
-2. **Perfil do Usuário** — Edição de dados, gerenciamento de endereços
-3. **Perfil de Vendedor** — Ativação, descrição, tipo (individual, bookstore, sebo)
-4. **Catálogo de Livros** — Listagem, busca, filtros, detalhes
-5. **Anúncios (Listings)** — Criar, editar, pausar, remover, moderar
-6. **Favoritos** — Salvar livros para consulta posterior
-7. **Carrinho** — Multi-vendedor, validação de estoque
-8. **Checkout** — Seleção de endereço, pagamento simulado
-9. **Pedidos** — Criação, rastreamento, histórico
-10. **Avaliações & Reputação** — Reviews de vendedor, cálculo de rating
-11. **Administração** — Dashboard, gestão de usuários, moderação
-12. **Moderação** — Aprovação/bloqueio de anúncios, verificação de conteúdo
-13. **Categorias** — Gestão hierárquica de categorias
-14. **Relatórios** — Métricas para vendedor e admin
+- **Onboarding e auth** — Splash, onboarding com chips de interesse, login, registro com validação client-side; sessão persistente via `expo-secure-store` e refresh automático em 401.
+- **Marketplace Home** — categorias, ofertas-relâmpago (calculadas via `discountPercent`), recomendados, vendedor em destaque, último pedido em andamento; pull-to-refresh invalida todas as queries em paralelo; estados granulares de Loading/Error/Empty por seção.
+- **Catálogo** — busca debounced (350ms), `FlatList` vertical com paginação infinita via `useInfiniteQuery`, modal de filtros (categoria, condição, faixa de preço, cidade/UF), contador de resultados e botão "Limpar filtros".
+- **Detalhes do livro** — capa, título Fraunces, autor, eyebrow de categoria, preço com desconto calculado, badge de condição, estoque, descrição, card do vendedor (tipo + rating), botões "Favoritar" (toggle real) e "Adicionar ao carrinho" com feedback via Toast.
+- **Favoritos** — lista persistida no backend, tap navega para detalhes.
+- **Carrinho** — stepper de quantidade respeitando `stockQuantity`, lixeira por item, subtotal vindo do backend, CTA "Finalizar pedido".
+- **Checkout** — seleção de endereço cadastrado (padrão pré-selecionado) com **fallback inline** quando o usuário não tem endereço, resumo (subtotal + frete simulado R$ 0,00 + total), nota de "pagamento simulado", confirmação `paymentMethod=SIMULATED` e navegação direta para os detalhes do pedido criado.
+- **Pedidos** — abas Todos / Em andamento / Entregues; detalhes com **timeline visual** (`CREATED → CONFIRMED → IN_PREPARATION → SHIPPED → DELIVERED`) pintada por status; cancelamento condicionado a status canceláveis; quando `DELIVERED`, CTA para avaliar.
+- **Avaliação** — input customizado de 5 estrelas, chips de tags sugeridas, textarea com contador 500 chars.
+- **Perfil** — avatar com iniciais, edição de nome/telefone (e-mail readonly), gerenciamento de endereços (CRUD + definir padrão), logout.
 
----
+### 🏪 Vendedor (SELLER)
 
-## 🛠️ Stack Tecnológico
+- **Ativação** — form de loja (`storeName`, descrição, tipo INDIVIDUAL/BOOKSTORE/SEBO); após `POST /api/sellers`, o app força refresh do JWT para a nova role entrar no token antes da próxima chamada autenticada (caso clássico de role-add em runtime).
+- **Painel** — 6 MetricCards (Anúncios ativos, Pendentes, Esgotados, Pedidos abertos, Vendas 30 dias, Receita 30 dias), atalho para reputação, botão de swap para o modo comprador.
+- **Anúncios** — `FlatList` de listings com badge de status (Em análise/Ativo/Pausado/Bloqueado/Esgotado), ações condicionais Pausar/Reativar/Remover; FAB `+` abre criação.
+- **Criar anúncio** — busca debounced de livro existente (`booksApi.search`) ou cadastro inline de livro novo (`POST /api/books`) com chips de categoria; depois preenche preço, preço original, estoque, condição (chips), descrição, URL da capa e localização. Submit cria o listing em `PENDING_REVIEW`.
+- **Pedidos recebidos** — lista + detalhe; CTA dinâmica "Mover para 'CONFIRMED' / 'IN_PREPARATION' / 'SHIPPED' / 'DELIVERED'" baseada na transição válida atual; status terminais mostram "Sem mais transições".
+- **Relatórios** — métricas + **barras horizontais proporcionais custom** (zero dep nova) para split de anúncios por status e pedidos abertos vs concluídos.
+- **Reputação** — média + total de reviews + lista de avaliações.
 
-| Camada | Tecnologia |
-|--------|-----------|
-| **Mobile** | React Native + Expo (managed) + TypeScript |
-| **Backend** | Kotlin 1.9 + Spring Boot 3.3 + Java 21 |
-| **Banco de Dados** | PostgreSQL 16 |
-| **Migrações** | Flyway |
-| **API** | REST (OpenAPI 3.1) |
-| **Autenticação** | JWT |
-| **Build Backend** | Gradle Kotlin DSL |
-| **Contêineres** | Docker Compose |
-| **Monorepo** | pnpm workspaces |
-| **Navegação Mobile** | React Navigation v6 |
-| **Estado Mobile** | Zustand |
-| **CI/CD** | GitHub Actions |
+### 🛡️ Admin
 
----
+- **Painel** — 6 MetricCards globais (Usuários, Vendedores, Anúncios ativos, Em moderação, Pedidos hoje, GMV 30 dias), atalho para auditoria de pedidos, swap para modo comprador.
+- **Usuários** — filtros por status (Todos/Ativos/Bloqueados/Pendentes), bloqueio com motivo e desbloqueio.
+- **Moderação** — filtros Pendentes/Ativos/Bloqueados/Todos; aprovar anúncios faz eles entrarem no catálogo público imediatamente (invalidação cascateada de `queryKeys.listings.all`).
+- **Categorias** — CRUD via modal bottom sheet (nome, descrição, ícone Ionicon) + ativar/desativar.
+- **Auditoria de pedidos** — lista geral + detalhe com IDs de comprador/vendedor, payment status.
+- **Relatórios** — GMV 30 dias, pedidos hoje, split visual de anúncios, card de comunidade.
 
-## 🏗️ Arquitetura
+### 🔀 Navegação por role
 
-### Arquitetura Inicial (MVP)
+O `RootNavigator` escolhe a árvore de telas baseada em `useAuthStore.activeRole`, com prioridade `ADMIN > SUPPORT > SELLER > CUSTOMER`. Isso garante que:
 
-```
-React Native App (Expo)
-      |
-      | HTTPS / REST
-      v
-Kotlin Spring Boot API (Monólito Modular)
-      |
-      v
-PostgreSQL 16
-```
+- Admin loga e cai direto em `AdminTabs`.
+- Vendedor loga e cai em `SellerTabs`.
+- Comprador puro loga e cai em `BuyerTabs`.
 
-### Arquitetura Evolutiva
-
-```
-React Native App
-      |
-API Gateway / Load Balancer
-      |
-Kotlin Spring Boot API
-      |
-      ├── PostgreSQL
-      ├── Redis (cache)
-      ├── Object Storage (imagens)
-      ├── Message Broker (eventos)
-      ├── Payment Gateway
-      ├── Shipping Provider
-      └── Notification Provider
-```
-
-### Módulos da API (Monólito Modular)
-
-```
-auth (autenticação e tokens)
-users (perfis e endereços)
-sellers (vendedores e reputação)
-books (catálogo de livros)
-categories (categorias e tags)
-listings (anúncios de livros)
-favorites (sistema de favoritos)
-cart (carrinho de compras)
-orders (pedidos e rastreamento)
-reviews (avaliações e ratings)
-admin (painel administrativo)
-reports (denúncias e auditoria)
-shared (configurações globais)
-```
+Os dashboards de admin e seller têm um botão de **swap** que permite voltar para o modo comprador (`switchRole('CUSTOMER')`) sem logout.
 
 ---
 
-## 🏢 Estrutura do Monorepo
+## Stack
 
-```
-CulturaZ/
-├── apps/
-│   ├── mobile/
-│   │   ├── src/
-│   │   │   ├── app/
-│   │   │   ├── components/
-│   │   │   ├── screens/
-│   │   │   ├── services/
-│   │   │   ├── stores/
-│   │   │   ├── types/
-│   │   │   ├── hooks/
-│   │   │   ├── theme/
-│   │   │   └── utils/
-│   │   ├── app.json
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   │
-│   └── api/
-│       ├── src/main/kotlin/com/culturaz/api/
-│       ├── src/main/resources/
-│       ├── build.gradle.kts
-│       └── Dockerfile
-│
-├── packages/
-│   └── contracts/
-│       ├── openapi.yaml
-│       └── README.md
-│
-├── docs/
-│   ├── requisitos.md
-│   ├── arquitetura.md
-│   ├── banco-de-dados.md
-│   ├── regras-de-negocio.md
-│   ├── api-contracts.md
-│   └── figma-ui-ux.md
-│
-├── infra/
-│   ├── docker-compose.yml
-│   └── postgres/init/
-│
-├── .github/workflows/
-│
-├── README.md
-├── pnpm-workspace.yaml
-└── package.json
-```
+| Camada                  | Tecnologia                                                |
+| ----------------------- | --------------------------------------------------------- |
+| **Mobile**              | React Native 0.74 · Expo SDK 51 · TypeScript 5.3          |
+| **Navegação**           | React Navigation v6 (native stack + bottom tabs)          |
+| **State server**        | TanStack Query v5                                         |
+| **State client**        | Zustand 4                                                 |
+| **Tipos da API**        | `openapi-typescript` (gerado de `packages/contracts`)     |
+| **Sessão**              | `expo-secure-store` (Bearer + refresh single-flight)      |
+| **Tipografia**          | Fraunces (display) + Inter (corpo)                        |
+| **Backend**             | Kotlin 1.9 · Spring Boot 3.3 · Java 21                    |
+| **Build backend**       | Gradle Kotlin DSL                                         |
+| **Banco**               | PostgreSQL 16                                             |
+| **Migrações**           | Flyway (`V001…V013`)                                      |
+| **Contratos**           | OpenAPI 3.1 (fonte de verdade — `packages/contracts`)     |
+| **Auth**                | JWT (HS512) com refresh rotativo                          |
+| **Contêineres**         | Docker Compose (API + PostgreSQL)                         |
+| **Monorepo**            | pnpm workspaces (`node-linker=hoisted`)                   |
+| **CI**                  | GitHub Actions (`ci-mobile.yml`, `ci-api.yml`)            |
 
 ---
 
-## 🚀 Como Rodar Localmente
-
-### Pré-requisitos
-
-- **Node.js 20+** e **pnpm 9+** (`npm i -g pnpm`)
-- **Java 21** (Temurin recomendado)
-- **Docker Desktop** com Docker Compose
-- **Git** para clonar
-
-### Setup Inicial (5 minutos)
-
-```bash
-# 1. Clonar repositório
-git clone https://github.com/DevAngeloOliveira/CulturaZ.git
-cd CulturaZ
-
-# 2. Copiar variáveis de ambiente
-cp .env.example .env
-
-# 3. Instalar dependências
-pnpm install
-
-# 4. Subir banco de dados
-pnpm infra:up
-
-# Abra novo terminal para os próximos passos
-
-# 5. Terminal 2: Rodar API
-pnpm api:run
-# ✅ API em http://localhost:8080
-
-# 6. Terminal 3: Rodar mobile
-pnpm mobile
-# ✅ Abra QR code no Expo Go
-```
-
-### Interfaces Disponíveis
-
-| Interface | URL | Credenciais |
-|-----------|-----|-------------|
-| Adminer (DB) | http://localhost:8081 | culturaz / culturaz |
-| API Health | http://localhost:8080/actuator/health | — |
-| Swagger (em desenvolvimento) | http://localhost:8080/swagger-ui | — |
-
-### Comandos Úteis
-
-```bash
-# Mobile
-pnpm mobile              # Expo Dev Server
-pnpm mobile:typecheck    # Verificar tipos TS
-
-# API
-pnpm api:run             # Iniciar Spring Boot
-pnpm api:build           # Build + testes
-
-# Infra
-pnpm infra:up            # Subir PostgreSQL + Adminer
-pnpm infra:down          # Parar containers
-```
-
----
-
-## 📚 Documentação
-
-Documentação completa em [docs/](docs/):
-
-| Arquivo | Conteúdo |
-|---------|----------|
-| [requisitos.md](docs/requisitos.md) | Requisitos funcionais, personas, escopo |
-| [arquitetura.md](docs/arquitetura.md) | Visão técnica, decisões arquiteturais |
-| [banco-de-dados.md](docs/banco-de-dados.md) | Schema, ERD, índices |
-| [regras-de-negocio.md](docs/regras-de-negocio.md) | Regras numeradas (RN-xxx) |
-| [api-contracts.md](docs/api-contracts.md) | Endpoints REST |
-| [figma-ui-ux.md](docs/figma-ui-ux.md) | Design System, tokens, fluxos |
-
----
-
-## 📡 Especificação de Endpoints
-
-### Auth
-
-```http
-POST   /api/auth/register
-POST   /api/auth/login
-POST   /api/auth/logout
-GET    /api/auth/me
-POST   /api/auth/refresh
-```
-
-### Catálogo
-
-```http
-GET    /api/books                  # Lista com paginação
-GET    /api/books/{id}             # Detalhes
-GET    /api/books/search?q=termo   # Busca
-GET    /api/categories             # Categorias
-```
-
-### Anúncios
-
-```http
-GET    /api/listings
-POST   /api/seller/listings        # Criar
-PUT    /api/seller/listings/{id}   # Editar
-PATCH  /api/seller/listings/{id}/pause
-```
-
-### Carrinho e Pedidos
-
-```http
-GET    /api/cart
-POST   /api/cart/items
-POST   /api/orders                 # Checkout
-GET    /api/orders/me              # Meus pedidos
-```
-
-### Vendedor
-
-```http
-POST   /api/sellers                # Ativar
-GET    /api/sellers/me/dashboard
-GET    /api/seller/orders
-```
-
-### Admin
-
-```http
-GET    /api/admin/dashboard
-GET    /api/admin/users
-PATCH  /api/admin/users/{id}/block
-```
-
----
-
-## 🗄️ Modelo de Dados
-
-### Entidades Principais
-
-**User**
-```
-- id: UUID
-- name, email, phone
-- passwordHash
-- status: ACTIVE | BLOCKED | PENDING_VERIFICATION | DELETED
-- roles: CUSTOMER | SELLER | ADMIN
-```
-
-**Book**
-```
-- id: UUID
-- title, author, publisher, isbn
-- categoryId
-```
-
-**BookListing**
-```
-- id: UUID
-- bookId, sellerId
-- price, stockQuantity
-- condition: NEW | LIKE_NEW | GOOD | FAIR | DAMAGED
-- status: PENDING_REVIEW | ACTIVE | PAUSED | BLOCKED | SOLD_OUT
-```
-
-**Order**
-```
-- id: UUID
-- buyerId, status, paymentStatus
-- items (múltiplos vendedores)
-- subtotalAmount, shippingAmount, totalAmount
-```
-
-**SellerProfile**
-```
-- id: UUID
-- userId, storeName, type
-- rating, status
-```
-
-**Review**
-```
-- id: UUID
-- orderId, sellerId, reviewerId
-- rating (1-5), comment, tags
-```
-
----
-
-## ⚡ Requisitos Não-Funcionais
-
-| Aspecto | Descrição |
-|---------|-----------|
-| **Desempenho** | Listagens paginadas, busca com índices, resposta <500ms |
-| **Escalabilidade** | Backend stateless, JWT, preparado para Redis e filas |
-| **Segurança** | Senhas com bcrypt, autenticação em todos endpoints, auditoria |
-| **Manutenibilidade** | Monorepo organizado, separação de responsabilidades, Clean Code |
-| **Usabilidade** | Busca sempre visível, ações em poucos toques, validações claras |
-| **Observabilidade** | Logs estruturados, rastreamento de eventos críticos |
-
----
-
-## 🔗 Links Úteis
-
-- **Repositório:** https://github.com/DevAngeloOliveira/CulturaZ
-- **Figma — Design System v0.1:** https://www.figma.com/design/3GJETOFgD8T1Vkiwkbp4YU/CulturaZ
-- **Figma — Fluxo completo (29 telas):** [node 1:515 no Figma]
-- **Figma — Home refinada:** [node 1:2176 no Figma]
-
----
-
-## 📝 Observação
-
-Este projeto é desenvolvido em contexto acadêmico, mas é **modelado como produto real**: arquitetura escalável, documentação profissional, separação clara de responsabilidades, padrões de mercado. O objetivo é servir como portfólio técnico e demonstrar capacidade de levar um produto da ideia à fundação executável.
-- **Para compradores:** livros novos são caros e a oferta de usados está espalhada em marketplaces genéricos onde a busca por título/edição é frustrante.
-- **Para sebos e vendedores pequenos:** dependem de plataformas pesadas, com taxas altas e sem foco em livro como categoria.
-- **Para quem tem livros parados em casa:** falta um canal simples para revender e dar nova vida ao acervo.
-
-## Proposta de valor
-
-- Catálogo focado em livro: título, autor, editora, ISBN, edição, condição.
-- Comparação clara de **condição** (novo, seminovo, bom, regular, desgastado) e **reputação** do vendedor.
-- Suporte nativo a **sebos** e **revendedores individuais** com perfis dedicados.
-- UX mobile-first com Design System próprio, identidade editorial.
-
-## 🛠 Stack
-
-| Camada                  | Tecnologia                                       |
-| ----------------------- | ------------------------------------------------ |
-| **Mobile**              | React Native + Expo (managed) + TypeScript       |
-| **Navegação**           | React Navigation v6 (native stack + bottom tabs) |
-| **Estado**              | Zustand                                          |
-| **Tipografia**          | Fraunces (títulos) + Inter (corpo)               |
-| **Backend**             | Kotlin 1.9 + Spring Boot 3.3 + Java 21           |
-| **Build backend**       | Gradle Kotlin DSL                                |
-| **Banco**               | PostgreSQL 16                                    |
-| **Migrações**           | Flyway                                           |
-| **API**                 | REST (OpenAPI 3.1 como fonte de verdade)         |
-| **Auth**                | JWT (implementação em progresso)                 |
-| **Contêineres**         | Docker Compose                                   |
-| **Monorepo**            | pnpm workspaces                                  |
-| **CI/CD**               | GitHub Actions                                   |
-
-## Arquitetura geral
+## Arquitetura
 
 ```
 ┌──────────────────┐        REST / JSON         ┌────────────────────┐
 │  Mobile (Expo)   │ ─────────────────────────▶ │  API (Spring Boot) │
-│  React Native    │                            │  Kotlin · Java 21  │
+│  React Native    │   Bearer JWT + refresh     │  Kotlin · Java 21  │
 │  TypeScript      │ ◀───────────────────────── │  Monólito modular  │
 └──────────────────┘                            └──────────┬─────────┘
-                                                           │ JPA / Flyway
+                                                           │ JPA + Flyway
                                                            ▼
                                                 ┌────────────────────┐
                                                 │  PostgreSQL 16     │
@@ -511,560 +156,271 @@ Este projeto é desenvolvido em contexto acadêmico, mas é **modelado como prod
                                                 └────────────────────┘
 ```
 
-O backend é um **monólito modular** organizado por domínio (`users`, `sellers`, `books`, `listings`, `cart`, `orders`, `reviews`, `admin`). Microsserviços ficam fora de escopo até que haja necessidade concreta — ver [docs/decisoes-arquiteturais.md](docs/decisoes-arquiteturais.md).
+### Backend — monólito modular por domínio
 
-Pagamento, frete, chat e IA estão **previstos** mas não implementados — ver [docs/roadmap.md](docs/roadmap.md).
+Cada domínio tem seu controller, service, repository e testes isolados. Acoplamento entre módulos só por DTO + chamadas via service.
 
-### 🧩 Módulos da API (Kotlin + Spring Boot)
-
-A API é estruturada em domínios independentes, cada um com suas responsabilidades:
-
-| Módulo | Responsabilidade | Status |
-|--------|-----------------|--------|
-| **auth** | Autenticação, login, registro, geração de tokens JWT | 🔄 Em desenvolvimento |
-| **users** | Gerenciamento de perfis, roles (CUSTOMER, SELLER, ADMIN, SUPPORT), status de conta | 🔄 Em desenvolvimento |
-| **books** | Catálogo de livros com metadados completos (título, autor, ISBN, editora, ano) | 📋 Base estruturada |
-| **listings** | Anúncios de livros (preço, condição, estoque, imagens, status) | 📋 Base estruturada |
-| **sellers** | Perfis de vendedores (individual, bookstore, sebo), ratings e reputação | 🔄 Em desenvolvimento |
-| **orders** | Gestão de pedidos, status, itens, histórico e rastreamento | 📋 Base estruturada |
-| **cart** | Carrinho de compras multi-vendedor, adicionar/remover, checkout | 📋 Base estruturada |
-| **reviews** | Avaliações de vendedores, comentários, tags e filtros | 📋 Base estruturada |
-| **categories** | Categorias de livros com ícones, contadores e árvore de subcategorias | 📋 Base estruturada |
-| **favorites** | Sistema de favoritos/wishlist por usuário | 📋 Base estruturada |
-| **admin** | Painel administrativo, métricas, moderação e bloqueio de usuários | 🔄 Em desenvolvimento |
-| **reports** | Denúncias de usuários/anúncios inadequados | 📋 Base estruturada |
-
----
-
-## 📱 Componentes & Telas do Mobile (React Native + TypeScript)
-
-### Interface Component System
-
-**Buttons & Actions**
-- `Button` — Primário, secundário, com loading states
-- `FloatingActionButton` — FAB com ícone
-- `IconButton` — Ações rápidas
-
-**Cards & Displays**
-- `BookCard` — Exibe livro com imagem, título, preço, condição
-- `SellerCard` — Perfil do vendedor com rating
-- `OrderCard` — Status e resumo de pedido
-- `CategoryCard` — Categoria com ícone e contador
-- `ReviewCard` — Avaliação com rating e comentário
-
-**Forms & Input**
-- `TextField` — Entrada de texto com validação
-- `PasswordField` — Input seguro com toggle visibility
-- `SearchInput` — Busca com debounce
-- `SelectChip` — Seleção de filtros (condição, categoria)
-- `SelectChipGroup` — Múltiplas seleções
-
-**Layout**
-- `AppScreen` — Wrapper com SafeArea, padding padrão
-- `AppHeader` — Header customizável com back button
-- `BottomTabBar` — Navegação inferior (Marketplace, Pedidos, Vendedor, Admin)
-- `SectionHeader` — Título com ação (ex: "Ver todos")
-
-**Feedback**
-- `Badge` — Tag de status, condição, categoria
-- `LoadingState` — Skeleton loaders
-- `EmptyState` — Estado vazio com ilustração
-- `ErrorState` — Erro com retry
-- `StatusDot` — Indicador visual de status
-
-**Marketplace Sections**
-- `HeroBanner` — Imagem destaque no topo da home
-- `CategoryCarousel` — Scroll horizontal de categorias
-- `FlashOffersSection` — Oferta relâmpago com countdown
-- `RecommendedBooksSection` — Livros recomendados por algoritmo
-- `FeaturedSellerSection` — Destaque de seller ou sebo
-
-### Fluxos de Telas
-
-**Public (Não autenticado)**
 ```
-SplashScreen → OnboardingScreen → LoginScreen / RegisterScreen
+auth         · login, registro, refresh, /me, JWT HS512
+users        · perfil, endereços, atualização de dados
+sellers      · ativação, perfil, dashboard, reputação, CRUD de listings, gestão de pedidos
+books        · catálogo (search com filtros, getById, create)
+categories   · listagem pública + CRUD admin
+listings     · catálogo público de anúncios com filtros
+favorites    · adicionar/remover/listar
+cart         · carrinho do usuário com cálculo de subtotal
+orders       · checkout (SIMULATED), histórico, cancelamento
+reviews      · avaliações pós-DELIVERED, alimentam rating do vendedor
+admin        · dashboard global, moderação, gestão de usuários/categorias/pedidos
 ```
 
-**Marketplace (Buyer/Comprador)**
+### Mobile — camadas e fluxo de dados
+
 ```
-MarketplaceHomeScreen → Busca/Filtros → BookDetailScreen → CartScreen → CheckoutScreen
-                    ↓
-              OrderHistoryScreen → OrderDetailScreen
+Tela (componente fino)
+   ↓
+hooks/api/useXxx (TanStack Query)
+   ↓
+services/api/xxx.ts (cliente tipado por endpoint)
+   ↓
+services/http.ts (Bearer + timeout 15s + refresh single-flight em 401)
+   ↓
+fetch ─→ API
 ```
 
-**Seller/Vendedor (Em desenvolvimento)**
-```
-SellerDashboardScreen → AnúnciosScreen → CriarAnúncioScreen
-                    ↓
-              VendasScreen → DetalhesVendaScreen
-```
+- **Tipos da API** vivem em `types/api.generated.ts` (gerado por `pnpm --filter mobile gen:api`).
+- **Adapters API → tipos locais** em `utils/adapters.ts` (`toListing`, `toCategory`, `toOrder`).
+- **Tela** não conhece HTTP: só consome hooks, recebe dados já no formato local.
+- **Auth store** (`Zustand`) é a fonte da verdade de sessão; mutations relevantes (perfil, ativação de vendedor) sincronizam o `user` no store para a UI reagir sem precisar recarregar.
 
-**Admin (Em desenvolvimento)**
+### Navegação no mobile
+
 ```
-AdminDashboardScreen → ModeraçãoScreen → UsuáriosScreen
-                    ↓
-              RelatóriosScreen
+RootNavigator
+├── PublicStack         (deslogado)
+│   ├── Splash → Onboarding → Login/Register/ForgotPassword
+├── BuyerTabs           (CUSTOMER ativo)
+│   ├── HomeStack       (Home → BookDetails → Favorites → Cart → Checkout → OrderDetails → Review)
+│   ├── SearchStack     (Catalog → BookDetails → Filters[modal])
+│   ├── ActivateSeller  (form de virada de role)
+│   ├── OrdersStack     (MyOrders → OrderDetails → Review)
+│   └── ProfileStack    (Profile → Addresses)
+├── SellerTabs          (SELLER ativo)
+│   ├── DashboardStack  (Dashboard → Reputation)
+│   ├── ListingsStack   (MyListings → CreateListing)
+│   ├── OrdersStack     (SellerOrders → SellerOrderDetails)
+│   └── Reports
+└── AdminTabs           (ADMIN ativo)
+    ├── DashboardStack  (Dashboard → AdminOrders → AdminOrderDetails)
+    ├── Users
+    ├── Moderation
+    ├── Categories
+    └── Reports
 ```
 
 ---
 
-## 🎯 Tipos de Dados (Domain Model)
-
-### Entidades Principais
-
-**👤 User** — Representa um usuário do sistema
-```
-ID | Email | Senha (bcrypt) | Nome | Telefone | Foto | Roles | Status | CreatedAt
-- Roles: CUSTOMER, SELLER, ADMIN, SUPPORT
-- Status: ACTIVE, PENDING_VERIFICATION, BLOCKED, DELETED
-```
-
-**📚 Book** — Catálogo de livros (dados imutáveis)
-```
-ID | Título | Autor | Editora | ISBN | Ano Publicação | Descrição | Categorias
-```
-
-**🏷️ BookListing** — Anúncio de um livro específico
-```
-ID | BookID | SellerID | Preço | Condição | Estoque | Imagens | Status | CreatedAt
-- Condição: NEW, LIKE_NEW, GOOD, FAIR, DAMAGED
-- Status: ACTIVE, DEACTIVATED, SOLD_OUT
-```
-
-**👨‍💼 Seller** — Perfil de vendedor
-```
-ID | UserID | TipoVendedor | Descrição | Localização | Rating | TotalVendas | Status
-- TipoVendedor: INDIVIDUAL, BOOKSTORE, SEB
-```
-
-**🛒 Order** — Pedido de compra
-```
-ID | UserID | Items | SubTotal | Frete | Total | StatusPagamento | StatusEntrega | CreatedAt | UpdatedAt
-- Items: Múltiplos livros de múltiplos vendedores
-- StatusPagamento: PENDING, WAITING_PAYMENT, PAID, FAILED, REFUNDED
-- StatusEntrega: CREATED, SHIPPED, DELIVERED, CANCELED
-```
-
-**💳 Cart** — Carrinho de compras
-```
-ID | UserID | Items | SubTotal | Timestamp
-- Multi-seller: itens de diferentes vendedores
-```
-
-**⭐ Review** — Avaliação de vendedor
-```
-ID | OrderID | BuyerID | SellerID | Rating | Comentário | Tags | CreatedAt
-- Rating: 1-5 stars
-- Tags: "Entrega rápida", "Embalagem ótima", "Descrição precisa", etc
-```
-
-**📂 Category** — Categorias de livros
-```
-ID | Nome | Ícone | Descrição | Parent (para subcategorias)
-```
-
-**❤️ Favorite** — Wishlist/favoritos
-```
-ID | UserID | ListingID | CreatedAt
-```
-
----
-
-## 🏗️ Estrutura do Monorepo
+## Estrutura do monorepo
 
 ```
 CulturaZ/
-├── 📱 apps/
-│   ├── mobile/                    # React Native + Expo (iOS/Android)
+├── apps/
+│   ├── mobile/                          # React Native + Expo
+│   │   ├── App.tsx
 │   │   ├── src/
-│   │   │   ├── components/        # Design System & UI Kit
-│   │   │   ├── screens/           # Telas (Public, Buyer, Seller, Admin)
-│   │   │   ├── services/          # API calls & HTTP client
-│   │   │   ├── stores/            # Zustand state management (auth, cart)
-│   │   │   ├── types/             # TypeScript interfaces & domain models
-│   │   │   ├── hooks/             # Custom hooks (useDebounce, useTheme)
-│   │   │   ├── theme/             # Design tokens (colors, spacing, typography)
-│   │   │   ├── mocks/             # Mock data for development
-│   │   │   └── utils/             # Utilities (format, assert)
+│   │   │   ├── app/
+│   │   │   │   ├── navigation/          # Root + stacks por tab
+│   │   │   │   └── providers/           # Query, Theme, Font
+│   │   │   ├── components/              # ~50 componentes reutilizáveis
+│   │   │   │   ├── buttons/ cards/ feedback/ forms/ layout/ marketplace/
+│   │   │   ├── screens/
+│   │   │   │   ├── public/  buyer/  seller/  admin/
+│   │   │   ├── services/
+│   │   │   │   ├── api/                 # 12 services tipados por domínio
+│   │   │   │   ├── http.ts              # Bearer + refresh single-flight
+│   │   │   │   └── session.ts           # expo-secure-store
+│   │   │   ├── stores/                  # auth, catalog
+│   │   │   ├── hooks/
+│   │   │   │   └── api/                 # 30 hooks (TanStack Query)
+│   │   │   ├── theme/                   # colors, radius, spacing, typography
+│   │   │   ├── types/
+│   │   │   │   ├── api.generated.ts     # gerado de openapi.yaml
+│   │   │   │   └── api.ts               # re-exports tipados
+│   │   │   └── utils/                   # adapters, format, apiErrors
+│   │   ├── metro.config.js
 │   │   └── package.json
 │   │
-│   └── api/                       # Kotlin + Spring Boot 3.3
+│   └── api/                             # Spring Boot 3.3 · Kotlin
 │       ├── src/main/kotlin/com/culturaz/api/
-│       │   ├── auth/              # Login, registro, JWT
-│       │   ├── users/             # Perfis, roles, status
-│       │   ├── books/             # Catálogo de livros
-│       │   ├── listings/          # Anúncios de livros
-│       │   ├── sellers/           # Perfis de vendedores, ratings
-│       │   ├── orders/            # Pedidos e rastreamento
-│       │   ├── cart/              # Carrinho multi-vendedor
-│       │   ├── reviews/           # Avaliações e comentários
-│       │   ├── categories/        # Categorias de livros
-│       │   ├── favorites/         # Sistema de favoritos
-│       │   ├── admin/             # Dashboard administrativo
-│       │   ├── reports/           # Denúncias e moderação
-│       │   ├── config/            # Configurações, exceções, filtros
-│       │   └── shared/            # Utilitários compartilhados
+│       │   ├── auth/ users/ sellers/ books/ categories/
+│       │   ├── listings/ favorites/ cart/ orders/ reviews/
+│       │   ├── admin/ shared/ config/
 │       ├── src/main/resources/
-│       │   ├── application.yml    # Configurações Spring
-│       │   └── db/migration/      # Scripts Flyway (V001, V002...)
-│       ├── build.gradle.kts       # Dependências e build Gradle
+│       │   ├── application.yml
+│       │   └── db/migration/            # V001…V013 (Flyway)
+│       ├── build.gradle.kts
 │       └── Dockerfile
 │
-├── 📦 packages/
+├── packages/
 │   └── contracts/
-│       ├── openapi.yaml           # Especificação REST API (fonte de verdade)
-│       ├── domain.md              # Glossário e modelos de domínio
-│       └── package.json
+│       ├── openapi.yaml                 # fonte de verdade (53 endpoints)
+│       └── domain.md
 │
-├── 📚 docs/
-│   ├── requisitos.md              # Visão, personas, user stories
-│   ├── banco-de-dados.md          # Schema, ERD, índices
-│   ├── arquitetura.md             # Decisões técnicas e justificativas
-│   ├── regras-de-negocio.md       # Regras RN-001, RN-002...
-│   ├── api-contracts.md           # Endpoints REST (tabela)
-│   ├── figma-ui-ux.md             # Design System, componentes, fluxos
-│   ├── roadmap.md                 # Fases de entrega (E1-E10)
-│   └──  decisoes-arquiteturais.md  # ADRs (Architecture Decision Records)      
+├── docs/                                # ver "Documentação adicional"
 │
-├── 🐳 infra/
-│   ├── docker-compose.yml         # PostgreSQL + Adminer
-│   └── postgres/init/             # Scripts SQL de inicialização
+├── infra/
+│   ├── docker-compose.yml               # PostgreSQL + API (perfis: default, full)
+│   ├── smoke-test.py                    # smoke E2E em Python
+│   └── postgres/init/
 │
-├── 🚀 .github/workflows/           # CI/CD pipelines
+├── .github/workflows/
+│   ├── ci-mobile.yml                    # typecheck + lint do mobile
+│   └── ci-api.yml                       # build + testes da API
 │
-├── 📄 pnpm-workspace.yaml          # Configuração do monorepo (pnpm)
-├── package.json                    # Scripts root (pnpm mobile, pnpm api:run)
-├── LICENSE
-├── .env.example
+├── pnpm-workspace.yaml
+├── package.json                         # scripts root agregadores
 └── README.md
 ```
 
-## 🚀 Como rodar localmente
+---
+
+## Como rodar localmente
 
 ### Pré-requisitos
 
-- **Node.js 20+** e **pnpm 9+** — [`npm i -g pnpm`](https://pnpm.io)
+- **Node.js 20+** e **pnpm 9+** — `npm i -g pnpm`
 - **Java 21** — [Temurin recomendado](https://adoptium.net)
-- **Docker Desktop** com Docker Compose
-- **Git** para clonar o repositório
+- **Docker Desktop** com Docker Compose v2
+- **Expo Go** no celular *ou* emulador Android/iOS
 
-### Setup inicial (5 minutos)
+### Setup (3 passos)
 
 ```bash
-# 1️⃣ Clonar o repositório
+# 1. Clonar + instalar dependências
 git clone https://github.com/DevAngeloOliveira/CulturaZ.git
 cd CulturaZ
-
-# 2️⃣ Copiar variáveis de ambiente
-cp .env.example .env
-
-# 3️⃣ Instalar dependências do monorepo (mobile + contracts)
 pnpm install
 
-# 4️⃣ Subir o banco de dados (PostgreSQL + Adminer)
-pnpm infra:up
+# 2. Subir backend completo (API + PostgreSQL via Docker)
+pnpm stack:up
+# Aguarde ~30s até API ficar "healthy" — confira com:
+docker ps
 
-# ⏸️  PARAR AQUI - abra novos terminais para os próximos passos
-
-# 5️⃣ Terminal 2: Rodar a API
-pnpm api:run
-# ✅ API disponível em http://localhost:8080
-# ✅ Health check em http://localhost:8080/actuator/health
-
-# 6️⃣ Terminal 3: Rodar o mobile
+# 3. Rodar o mobile
 pnpm mobile
-# ✅ Expo Dev Server pronto
-# 📱 Abra o QR code no Expo Go (Android) ou pressione 'i' (iOS)
 ```
 
-### 📚 Acessar interfaces
+> Em `apps/mobile/.env`, ajuste `EXPO_PUBLIC_API_URL` para o IP da sua máquina na LAN (ex.: `http://192.168.0.7:8080`) se for testar em celular físico. Para emulador Android Studio, `http://10.0.2.2:8080` também funciona.
 
-| Interface | URL | Usuário | Senha |
-|-----------|-----|---------|-------|
-| **Adminer** (DB) | http://localhost:8081 | culturaz | culturaz |
-| **API Health** | http://localhost:8080/actuator/health | — | — |
-| **Swagger UI** (em desenvolvimento) | http://localhost:8080/swagger-ui | — | — |
+### Verificar saúde
 
-### 🛠️ Comandos úteis
+| Recurso        | URL                                              |
+| -------------- | ------------------------------------------------ |
+| Health da API  | http://localhost:8080/actuator/health            |
+| OpenAPI JSON   | http://localhost:8080/v3/api-docs                |
+| Swagger UI     | http://localhost:8080/swagger-ui/index.html      |
+| PostgreSQL     | `localhost:5432` · user `culturaz` · db `culturaz` |
+
+### Comandos úteis
 
 ```bash
 # Mobile
-pnpm mobile              # Inicia Expo Dev Server
-pnpm mobile:typecheck    # Verifica tipos TypeScript (tsc --noEmit)
-pnpm mobile:build        # Build de produção
+pnpm mobile                       # Expo Dev Server
+pnpm mobile:typecheck             # tsc --noEmit
+pnpm mobile:lint                  # eslint
+pnpm --filter mobile gen:api      # regera types/api.generated.ts a partir do openapi.yaml
 
-# Backend API
-pnpm api:run             # Inicia Spring Boot em dev (hot reload)
-pnpm api:build           # Compila e roda testes
-pnpm api:test            # Testa componentes específicos
+# Backend
+pnpm api:run                      # bootRun (hot reload)
+pnpm api:build                    # build + testes
+pnpm api:test                     # testes
 
-# Infraestrutura
-pnpm infra:up            # Sobe PostgreSQL + Adminer
-pnpm infra:down          # Derruba containers
-pnpm infra:logs          # Ver logs em tempo real
-
-# Monorepo
-pnpm install             # Instala dependências (top-level + workspaces)
-pnpm -r build            # Build em todos os packages
+# Infra
+pnpm infra:up                     # só PostgreSQL
+pnpm infra:down
+pnpm stack:up                     # PostgreSQL + API (build)
+pnpm stack:down
+pnpm stack:logs                   # logs da API em tempo real
+pnpm stack:smoke                  # smoke test E2E (Python)
 ```
 
-### 🔍 Troubleshooting
+### Troubleshooting comum
 
-**"erro ao conectar no PostgreSQL"**
-```bash
-# Garantir que containers estão rodando
-docker ps
-# Se não aparecer, subir de novo
-pnpm infra:up
-```
-
-**"Porta 8080 já em uso"**
-```bash
-# Mudar porta na application.yml (apps/api/src/main/resources)
-server.port=8081
-```
-
-**"Erro de dependências no mobile"**
-```bash
-# Limpar cache e reinstalar
-rm -rf node_modules pnpm-lock.yaml
-pnpm install
-```
+- **Celular não alcança a API** — confirme que celular e PC estão na mesma Wi-Fi, abra `http://<seu-IP>:8080/api/categories` no browser do celular. Se travar, é firewall do Windows na 8080 (libere em PowerShell admin: `New-NetFirewallRule -DisplayName "CulturaZ 8080" -Direction Inbound -LocalPort 8080 -Protocol TCP -Action Allow -Profile Private`).
+- **"O servidor demorou para responder"** — mesmo sintoma do firewall, ou `EXPO_PUBLIC_API_URL` apontando para `localhost` em vez do IP da LAN.
+- **403 ao virar vendedor** — JWT antigo sem a role nova. Logout + login resolve. O fluxo do app agora força `forceRefreshSession()` logo após a ativação para evitar isso.
 
 ---
 
-## 🎯 Próximas ações (Prioridade)
+## Credenciais de desenvolvimento
 
-- [ ] Implementar JWT completo (Spring Security + token refresh)
-- [ ] Testes unitários para auth module
-- [ ] Swagger UI / OpenAPI integration
-- [ ] Dashboard admin básico
-- [ ] Fluxo seller (ativar conta + criar anúncio)
-- [ ] Integração de testes E2E (mobile + backend)
+O Flyway popula três usuários de seed via `V013__seed_local_admin_user.sql`:
 
----
+| Perfil    | E-mail                    | Senha           | Roles            |
+| --------- | ------------------------- | --------------- | ---------------- |
+| Admin     | `admin@culturaz.local`    | `Admin123456`   | ADMIN, CUSTOMER  |
+| Comprador | `buyer@culturaz.local`    | `Buyer123456`   | CUSTOMER         |
+| Vendedor  | `seller@culturaz.local`   | `Seller123456`  | SELLER, CUSTOMER |
 
-## 📖 Documentação detalhada
-
-A documentação completa fica em [docs/](docs/):
-
-| Arquivo                                                        | Conteúdo                                                |
-| -------------------------------------------------------------- | ------------------------------------------------------- |
-| [requisitos.md](docs/requisitos.md)                            | Visão, personas, requisitos funcionais e não-funcionais |
-| [arquitetura.md](docs/arquitetura.md)                          | Visão técnica geral, justificativas, evolução           |
-| [banco-de-dados.md](docs/banco-de-dados.md)                    | Modelo lógico, entidades, índices                       |
-| [regras-de-negocio.md](docs/regras-de-negocio.md)              | Regras numeradas (RN-xxx)                               |
-| [api-contracts.md](docs/api-contracts.md)                      | Tabela de endpoints REST                                |
-| [figma-ui-ux.md](docs/figma-ui-ux.md)                          | Design System, tokens, fluxos                           |
-| [roadmap.md](docs/roadmap.md)                                  | Fases de entrega                                        |
-| [portfolio-linkedin.md](docs/portfolio-linkedin.md)            | Como apresentar o projeto                               |
-| [decisoes-arquiteturais.md](docs/decisoes-arquiteturais.md)    | ADRs (Architecture Decision Records)                    |
-
-## 📊 Status do projeto
-
-### Entrega 1 — Fundação ✅ (Atual)
-
-**Progresso: 60%**
-
-O que já foi feito:
-- ✅ Estrutura completa do monorepo (pnpm workspaces, mobile + API)
-- ✅ Design System implementado (componentes, tokens, tema dark/light)
-- ✅ Schema do banco PostgreSQL (13 tabelas principais)
-- ✅ Autenticação skeleton (roteamento, guards)
-- ✅ Estrutura modular da API (domínios separados)
-- ✅ Configuração Docker Compose (PostgreSQL, Adminer)
-- ✅ Tipos TypeScript sincronizados com API
-- ✅ CI/CD basics (GitHub Actions)
-
-O que ainda falta:
-- 🔄 JWT tokens implementação real (login, registro, refresh)
-- 🔄 Dashboard admin (métricas, moderação)
-- 🔄 Fluxo seller/vendedor (criação de anúncios, análise)
-- 🔄 Swagger/OpenAPI UI (documentação auto)
+> ⚠️ **Não usar em produção.** Os hashes vão para o Git para deixar o setup local plug-and-play; em ambientes reais, seeds com credenciais reais devem vir de um vault.
 
 ---
 
-## 🗺️ Roadmap até Entrega Final (30 de Junho)
+## Documentação adicional
 
-> **Objetivo:** Marketplace funcional com fluxo completo de compra-venda, pronto para produção.
+Os arquivos abaixo aprofundam decisões e contratos. Todos vivem em [docs/](docs/).
 
-### Fase 1️⃣ — Fundação **(Até 31 de Maio) ✅ Em andamento**
-```
-[████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 60%
-```
-**Escopo:**
-- ✅ Estrutura do monorepo (pnpm workspaces)
-- ✅ Design System completo (componentes, tokens)
-- ✅ Schema PostgreSQL (13 tabelas)
-- ✅ Esqueleto da API com domínios
-- ✅ Docker Compose + CI/CD basics
+| Arquivo                                                          | Conteúdo                                                |
+| ---------------------------------------------------------------- | ------------------------------------------------------- |
+| [requisitos.md](docs/requisitos.md)                              | Visão, personas, requisitos funcionais e não-funcionais |
+| [arquitetura.md](docs/arquitetura.md)                            | Visão técnica geral, justificativas, evolução           |
+| [banco-de-dados.md](docs/banco-de-dados.md)                      | Modelo lógico, entidades, índices                       |
+| [regras-de-negocio.md](docs/regras-de-negocio.md)                | Regras numeradas (RN-xxx)                               |
+| [api-contracts.md](docs/api-contracts.md)                        | Tabela de endpoints REST                                |
+| [figma-ui-ux.md](docs/figma-ui-ux.md)                            | Design System, tokens, fluxos                           |
+| [plano-frontend.md](docs/plano-frontend.md)                      | Plano de execução das 8 sprints do mobile               |
+| [roadmap.md](docs/roadmap.md)                                    | Próximas fases (pós-MVP)                                |
+| [decisoes-arquiteturais.md](docs/decisoes-arquiteturais.md)      | ADRs                                                    |
 
-**Próximo:** Finalizar JWT real
-
----
-
-### Fase 2️⃣ — Autenticação + Catálogo **(1-15 de Junho)**
-```
-[░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
-```
-**Priority:** 🔴 CRÍTICO — Base para todo o resto
-
-**Autenticação (JWT):**
-- Endpoints: `POST /auth/login`, `/auth/register`, `/auth/refresh`, `/auth/logout`
-- Spring Security + JWT tokens
-- Validação de email
-- Roles: CUSTOMER, SELLER, ADMIN
-
-**Catálogo (Books & Categories):**
-- CRUD completo de Books & Categories
-- `GET /api/books` — Lista com paginação + filtros (categoria, preço, condição)
-- `GET /api/books/:id` — Detalhes do livro
-- `GET /api/books/search?q=termo` — Busca por título/autor/ISBN
-- `GET /api/categories` — Árvore de categorias
-
-**Telas no mobile:**
-- `LoginScreen` + `RegisterScreen` → JWT armazenado
-- `MarketplaceHomeScreen` — Categorias, destaques
-- `SearchScreen` — Busca com filtros
-- `BookDetailScreen` — Descrição, preço, seller, adicionar ao carrinho
+Contrato OpenAPI (53 endpoints): [packages/contracts/openapi.yaml](packages/contracts/openapi.yaml).
 
 ---
 
-### Fase 3️⃣ — Carrinho + Checkout + Pedidos **(16-22 de Junho)**
-```
-[░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
-```
-**Priority:** 🔴 CRÍTICO — Monetização
+## Decisões técnicas em destaque
 
-**Fluxo de Compra:**
-- Cart persistido (Zustand + localStorage)
-- Multi-vendedor no mesmo carrinho
-- Cálculo automático de frete (simulado por agora)
-
-**Endpoints:**
-- `POST /api/cart` — Adiciona item
-- `DELETE /api/cart/:id` — Remove item
-- `GET /api/cart` — Retorna carrinho
-- `POST /api/orders` — Cria pedido (checkout)
-- `GET /api/orders` — Histórico de pedidos
-- `GET /api/orders/:id` — Detalhes do pedido
-
-**Pagamento:** Simulado (badge "pago", sem integração real)
-
-**Telas no mobile:**
-- `CartScreen` — Resumo, frete, total
-- `CheckoutScreen` — Endereço de entrega
-- `OrderHistoryScreen` — Pedidos anteriores
+- **Tipos do mobile gerados do OpenAPI** — `openapi-typescript` cria `types/api.generated.ts` automaticamente. Mudou backend → roda `pnpm --filter mobile gen:api` e o front pega o drift na compilação.
+- **Refresh de JWT single-flight** — `services/http.ts` mantém um `Promise` em voo enquanto um refresh acontece, para várias requisições paralelas em 401 não dispararem N refreshes. Em falha terminal, chama o `setUnauthorizedHandler` que limpa sessão e cache do React Query.
+- **`forceRefreshSession()` exposto** — usado no fluxo de ativação de vendedor para reemitir JWT com a role nova antes da próxima chamada. Sem isso, o usuário continuaria com `roles: ["CUSTOMER"]` no token e veria 403 ao tentar publicar.
+- **Adapters API → tipos locais** — backend devolve `price: number`, mobile usa `Money = string` no domínio. `utils/adapters.ts` faz a ponte em um lugar só, tipos locais (`Book`, `BookListing`, etc.) recebem campos derivados como `discountPercentage` e `isFavorite`.
+- **Prioridade de roles invertida** — `ADMIN > SUPPORT > SELLER > CUSTOMER` em `pickActiveRole`. Admin que loga cai em `AdminTabs`, não em `BuyerTabs`. Swap manual existe para quando admin quer comprar.
+- **Toasts com Zustand + Animated** — `useToastStore` global, `ToastHost` ouve e renderiza com fade + translate. Zero dep nativa nova; pode ser invocado de qualquer mutation via `toast.success('…')`.
+- **Telas finas, hooks gordos** — telas só compõem; hooks invalidam queries certas; services chamam endpoints; HTTP cuida de auth. Cada camada tem uma responsabilidade.
+- **Sem mocks no app** — toda tela consome API real. Mocks ficaram só durante a construção e foram apagados na Sprint 8.
 
 ---
 
-### Fase 4️⃣ — Painel Vendedor + Admin MVP **(23-28 de Junho)**
-```
-[░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
-```
-**Priority:** 🟡 IMPORTANTE — Experiência completa
+## Roadmap futuro
 
-**Painel Vendedor (MVP):**
-- Ativação de conta como seller
-- Dashboard com métricas básicas (total de anúncios, vendas, rating)
-- Criar/editar/deletar anúncios
+Fora do escopo atual, mas previsto:
 
-**Endpoints:**
-- `POST /api/sellers/activate` — Ativa como vendedor
-- `GET /api/sellers/:id/dashboard` — Métricas
-- `POST /api/listings` — Cria anúncio
-- `PATCH /api/listings/:id` — Edita
-- `DELETE /api/listings/:id` — Remove
-
-**Painel Admin (MVP):**
-- Dashboard com métricas globais (GMV total, número de usuários, pedidos)
-- Lista de usuários com possibilidade de bloquear
-
-**Endpoints:**
-- `GET /api/admin/dashboard` — Métricas globais
-- `GET /api/admin/users` — Lista usuários
-- `PATCH /api/admin/users/:id/status` — Bloqueia/ativa usuário
-
-**Telas no mobile:**
-- `SellerDashboardScreen` — Métricas e ações rápidas
-- `ListingsScreen` — Lista de anúncios
-- `CreateListingScreen` — Criar novo anúncio
-- `AdminDashboardScreen` — Métricas e moderação básica
+| Feature                        | Status   | Notas                                                                      |
+| ------------------------------ | -------- | -------------------------------------------------------------------------- |
+| Pagamento real (Stripe/MP)     | 🟡 Plan  | Hoje `paymentMethod=SIMULATED`. Backend já modela `paymentStatus`.         |
+| Frete com Correios/Melhor Envio| 🟡 Plan  | Hoje `shippingAmount=0`. Modelo de endereço já suporta.                    |
+| Chat comprador↔vendedor        | 🟡 Plan  | UI hoje mostra "em breve" no BookDetails.                                  |
+| Upload de imagens (S3/similar) | 🟡 Plan  | Atualmente `coverImageUrl` é string externa (ex.: openlibrary.org).        |
+| Push notifications             | 🟡 Plan  | Expo Push está acessível pelo SDK 51, falta o backend disparar.            |
+| i18n e dark mode               | 🟡 Plan  | Theme tokens já existem; falta provider de tema e dicionários.             |
+| Validação de forms com Zod     | 🟠 Avaliar| Validação manual está OK hoje; ROI baixo até forms complexos chegarem.    |
+| Editoras / campanhas / pré-venda | 🔴 Backlog | Não modelado no backend; só entra se virar requisito.                    |
 
 ---
 
-### Fase 5️⃣ — Polish, Testes & Deploy **(29-30 de Junho)**
-```
-[░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 0%
-```
-**Priority:** 🟠 REFINAMENTOS
+## Autor e licença
 
-**Quality Assurance:**
-- Testes unitários (auth, cart, orders)
-- Testes de integração (API)
-- Testes E2E (fluxo comprador)
+- **Autor:** Ângelo Oliveira · [dev.angelooliveira@gmail.com](mailto:dev.angelooliveira@gmail.com)
+- **Repositório:** [github.com/DevAngeloOliveira/CulturaZ](https://github.com/DevAngeloOliveira/CulturaZ)
+- **Figma — Design System v0.1:** [figma.com/design/3GJETOFgD8T1Vkiwkbp4YU/CulturaZ](https://www.figma.com/design/3GJETOFgD8T1Vkiwkbp4YU/CulturaZ)
+- **Licença:** MIT (ver `package.json`)
 
-**Refinamentos:**
-- Tratamento de erros melhorado
-- Loading states + feedback visual
-- Validações no front + back
-- Documentação Swagger/OpenAPI
-
-**Deploy:**
-- Build de produção (mobile)
-- Deploy da API (Docker + CI/CD)
-- Dados de seed (livros, categorias, vendedores)
-- Guia de uso para apresentação
-
----
-
-## 📋 Roadmap Futuro (Pós-Entrega)
-
-Essas features ficarão para versão 2.0+ (não entram no deadline de junho):
-
-| Feature | Descrição | Estimativa |
-|---------|-----------|-----------|
-| **Avaliações & Reputação** | Reviews do seller com stars e comentários | Julho |
-| **Pagamento Real** | Stripe / Mercado Pago integrado | Agosto |
-| **Frete Real** | Cálculo com Correios / Sedex | Agosto |
-| **Chat & Notificações** | WebSocket para mensagens em tempo real | Setembro |
-| **Analytics Avançado** | Relatórios e insights para sellers | Outubro |
-| **Recomendações ML** | Busca semântica e sugestões personalizadas | Novembro+ |
-
-- **Repositório:** https://github.com/DevAngeloOliveira/CulturaZ
-- **Figma — Design System v0.1:** https://www.figma.com/design/3GJETOFgD8T1Vkiwkbp4YU/CulturaZ
-- **Issues abertos:** [GitHub Issues](https://github.com/DevAngeloOliveira/CulturaZ/issues)
-
----
-
-## 🤔 Por que essas tecnologias?
-
-### Mobile: React Native + Expo
-- **Escrita única** → Deploy Android + iOS sem duplicação
-- **Expo Managed** → Zero configuração nativa, focus no produto
-- **TypeScript** → Type safety desde o dia 1, menos bugs em produção
-- **Fast Refresh** → Dev experience excelente (hot reload <100ms)
-
-### Backend: Kotlin + Spring Boot
-- **Kotlin** → Sintaxe elegante, menos boilerplate que Java puro, null safety
-- **Spring Boot 3.3** → Padrão da indústria, suporte a GraalVM (compilação nativa futura)
-- **Java 21** → Project Loom (virtual threads), records, pattern matching
-- **Modular** → Domínios independentes facilita testes e escala
-
-### Banco: PostgreSQL 16
-- **JSON support** → Flexibilidade sem NoSQL
-- **Full-text search** → Busca nativa (melhor que Elasticsearch para casos simples)
-- **Arrays & Ranges** → Tipos ricos para negócio de livros
-- **Flyway** → Versionamento de schema como código
-
-### Monorepo: pnpm workspaces
-- **Linking local** → Mudança em `contracts/` reflete no mobile automaticamente
-- **Disk space** → Deduplica node_modules, 5x menor que npm/yarn
-- **Workspace protocol** → Versões sincronizadas por padrão
-
----
-
-## 🙏 Observação
-
-Este projeto é desenvolvido em contexto acadêmico, mas é **modelado como produto real**: arquitetura escalável, documentação profissional, separação clara de responsabilidades, padrões de mercado. O objetivo é servir como portfólio técnico e demonstrar capacidade de levar um produto da ideia à fundação executável.
+Projeto desenvolvido em contexto acadêmico, modelado como produto real para servir como portfólio técnico.
