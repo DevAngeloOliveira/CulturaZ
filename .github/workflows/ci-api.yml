@@ -3,15 +3,9 @@ name: CI · API
 on:
   push:
     branches: [main]
-    paths:
-      - 'apps/api/**'
-      - 'packages/contracts/**'
-      - '.github/workflows/ci-api.yml'
   pull_request:
-    paths:
-      - 'apps/api/**'
-      - 'packages/contracts/**'
-      - '.github/workflows/ci-api.yml'
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:

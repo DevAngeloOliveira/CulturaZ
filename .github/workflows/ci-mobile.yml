@@ -3,19 +3,9 @@ name: CI · Mobile
 on:
   push:
     branches: [main]
-    paths:
-      - 'apps/mobile/**'
-      - 'packages/contracts/**'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - '.github/workflows/ci-mobile.yml'
   pull_request:
-    paths:
-      - 'apps/mobile/**'
-      - 'packages/contracts/**'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - '.github/workflows/ci-mobile.yml'
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   typecheck:

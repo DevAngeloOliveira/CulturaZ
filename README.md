@@ -2,6 +2,8 @@
 
 > Marketplace mobile-first para compra, venda e revenda de livros — fluxo completo de **comprador, vendedor e administrador** em um monorepo com React Native (Expo), Kotlin + Spring Boot e PostgreSQL.
 
+[![CI Mobile](https://github.com/DevAngeloOliveira/CulturaZ/actions/workflows/ci-mobile.yml/badge.svg?branch=main)](https://github.com/DevAngeloOliveira/CulturaZ/actions/workflows/ci-mobile.yml)
+[![CI API](https://github.com/DevAngeloOliveira/CulturaZ/actions/workflows/ci-api.yml/badge.svg?branch=main)](https://github.com/DevAngeloOliveira/CulturaZ/actions/workflows/ci-api.yml)
 [![Status](https://img.shields.io/badge/status-MVP%20completo-brightgreen)](#status-do-projeto)
 [![Mobile](https://img.shields.io/badge/mobile-Expo%20SDK%2051-blue)](#stack)
 [![Backend](https://img.shields.io/badge/backend-Spring%20Boot%203.3-purple)](#stack)
@@ -110,7 +112,7 @@ Métricas do mobile:
 
 ## Arquitetura
 
-```
+```text
 ┌──────────────────┐        REST / JSON         ┌────────────────────┐
 │  Mobile (Expo)   │ ─────────────────────────▶ │  API (Spring Boot) │
 │  React Native    │   Bearer JWT + refresh     │  Kotlin · Java 21  │
@@ -128,7 +130,7 @@ Métricas do mobile:
 
 Cada domínio tem seu controller, service, repository e testes isolados. Acoplamento entre módulos só por DTO + chamadas via service.
 
-```
+```text
 auth         · login, registro, refresh, /me, JWT HS512
 users        · perfil, endereços, atualização de dados
 sellers      · ativação, perfil, dashboard, reputação, CRUD de listings, gestão de pedidos
@@ -144,7 +146,7 @@ admin        · dashboard global, moderação, gestão de usuários/categorias/p
 
 ### Mobile — camadas e fluxo de dados
 
-```
+```text
 Tela (componente fino)
    ↓
 hooks/api/useXxx (TanStack Query)
@@ -163,7 +165,7 @@ fetch ─→ API
 
 ### Navegação no mobile
 
-```
+```text
 RootNavigator
 ├── PublicStack         (deslogado)
 │   ├── Splash → Onboarding → Login/Register/ForgotPassword
@@ -190,7 +192,7 @@ RootNavigator
 
 ## Estrutura do monorepo
 
-```
+```text
 CulturaZ/
 ├── apps/
 │   ├── mobile/              React Native + Expo (App.tsx, src/{app,components,screens,services,stores,hooks,theme,types,utils})
@@ -236,12 +238,12 @@ pnpm mobile
 
 ### Verificar saúde
 
-| Recurso        | URL                                              |
-| -------------- | ------------------------------------------------ |
-| Health da API  | http://localhost:8080/actuator/health            |
-| OpenAPI JSON   | http://localhost:8080/v3/api-docs                |
-| Swagger UI     | http://localhost:8080/swagger-ui/index.html      |
-| PostgreSQL     | `localhost:5432` · user `culturaz` · db `culturaz` |
+| Recurso | URL |
+| --- | --- |
+| Health da API | `http://localhost:8080/actuator/health` |
+| OpenAPI JSON | `http://localhost:8080/v3/api-docs` |
+| Swagger UI | `http://localhost:8080/swagger-ui/index.html` |
+| PostgreSQL | `localhost:5432` · user `culturaz` · db `culturaz` |
 
 ### Comandos úteis
 
