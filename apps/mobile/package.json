@@ -11,7 +11,10 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "format": "prettier --write \"src/**/*.{ts,tsx,json,md}\"",
-    "gen:api": "openapi-typescript ../../packages/contracts/openapi.yaml -o src/types/api.generated.ts"
+    "gen:api": "openapi-typescript ../../packages/contracts/openapi.yaml -o src/types/api.generated.ts",
+    "eas:init": "eas init --id 40734117-6914-4464-a5d5-79fbfb878832",
+    "build:android:preview": "eas build -p android --profile preview",
+    "build:android:production": "eas build -p android --profile production"
   },
   "dependencies": {
     "@babel/runtime": "^7.25.0",

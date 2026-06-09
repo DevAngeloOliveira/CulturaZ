@@ -1,0 +1,50 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>CulturaZ App Icon</title>
+  <desc>Clean editorial marketplace icon with an open book and a golden Z bookmark.</desc>
+  <defs>
+    <linearGradient id="bg" x1="136" y1="80" x2="888" y2="944" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1E5447"/>
+      <stop offset="1" stop-color="#12352D"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="210" y1="338" x2="814" y2="770" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFF8E8"/>
+      <stop offset="1" stop-color="#F4E7C7"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="366" y1="248" x2="678" y2="764" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F1C35B"/>
+      <stop offset="1" stop-color="#D99A2B"/>
+    </linearGradient>
+    <filter id="shadow" x="132" y="208" width="760" height="652" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#071814" flood-opacity="0.28"/>
+    </filter>
+    <filter id="softShadow" x="260" y="180" width="504" height="652" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#071814" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="216" fill="url(#bg)"/>
+  <circle cx="216" cy="196" r="24" fill="#F6F0E4" opacity="0.16"/>
+  <circle cx="822" cy="810" r="34" fill="#F6F0E4" opacity="0.10"/>
+  <circle cx="828" cy="206" r="14" fill="#D99A2B" opacity="0.35"/>
+
+  <g filter="url(#shadow)">
+    <!-- left book page -->
+    <path d="M216 356C216 326 240 304 270 310C358 326 433 360 496 410V756C426 702 342 672 244 662C228 660 216 646 216 630V356Z" fill="url(#paper)"/>
+    <!-- right book page -->
+    <path d="M808 356C808 326 784 304 754 310C666 326 591 360 528 410V756C598 702 682 672 780 662C796 660 808 646 808 630V356Z" fill="url(#paper)"/>
+    <!-- center spine -->
+    <path d="M496 410C505 404 519 404 528 410V758C519 752 505 752 496 758V410Z" fill="#E6D4AA"/>
+    <!-- page lines -->
+    <path d="M294 440C354 452 406 475 456 506" stroke="#CDBB91" stroke-width="18" stroke-linecap="round" opacity="0.42"/>
+    <path d="M294 520C354 532 408 556 456 588" stroke="#CDBB91" stroke-width="18" stroke-linecap="round" opacity="0.32"/>
+    <path d="M730 440C670 452 618 475 568 506" stroke="#CDBB91" stroke-width="18" stroke-linecap="round" opacity="0.42"/>
+    <path d="M730 520C670 532 616 556 568 588" stroke="#CDBB91" stroke-width="18" stroke-linecap="round" opacity="0.32"/>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <!-- stylized Z / bookmark -->
+    <path d="M406 244H682C703 244 715 268 702 285L529 506H666C689 506 701 534 686 551L418 846C397 869 360 848 369 818L444 570H350C329 570 317 546 330 529L501 308H406C389 308 376 294 376 276C376 258 389 244 406 244Z" fill="url(#gold)"/>
+    <path d="M406 244H682C703 244 715 268 702 285L529 506H666C689 506 701 534 686 551L418 846C397 869 360 848 369 818L444 570H350C329 570 317 546 330 529L501 308H406C389 308 376 294 376 276C376 258 389 244 406 244Z" stroke="#FFF8E8" stroke-width="22" stroke-linejoin="round" opacity="0.7"/>
+    <path d="M422 279H622L458 492H621L421 711L490 536H384L550 279H422Z" fill="#D99A2B" opacity="0.28"/>
+  </g>
+</svg>
